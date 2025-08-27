@@ -18,7 +18,7 @@ Respond with valid JSON only (no code fences, no markdown, no explanations).
 Fields: calories (kcal), protein (g), carbs (g), fat (g).`
 
         const res = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`,
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },

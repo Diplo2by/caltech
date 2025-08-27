@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PieChart, Pie, ResponsiveContainer, Cell, Tooltip } from "recharts";
 import { useRouter } from "next/navigation";
+import { useUser } from "@stackframe/stack";
 
 const STORAGE_KEYS = {
   entries: "ct_entries_v1",
