@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { PieChart, Pie, ResponsiveContainer, Cell, Tooltip } from "recharts";
+import { PieChart, Pie, ResponsiveContainer, Cell } from "recharts";
 import { useUser } from "@stackframe/stack";
 import { todayISO, numberOrZero, uid } from "@/util/scripts";
 
@@ -21,32 +21,23 @@ export default function CalorieTrackerApp() {
   const [editingId, setEditingId] = useState("");
   const [search, setSearch] = useState("");
   const [loadingMacros, setLoadingMacros] = useState(false);
-  const COLORS = ["#4caf50", "#e0e0e0"];
 
-  // const { user, isSignedIn } = useUser();
   const user = useUser();
-  const isSignedIn = user ? true : false;
+  const isSignedIn = !!user;
 
-  // Load user goal and entries when component mounts or date changes
   useEffect(() => {
-    if (isSignedIn) {
-      loadUserData();
-    }
+    if (isSignedIn) loadUserData();
   }, [isSignedIn]);
 
   useEffect(() => {
-    if (isSignedIn) {
-      loadEntries();
-    }
+    if (isSignedIn) loadEntries();
   }, [date, isSignedIn]);
 
   async function loadUserData() {
     try {
       const res = await fetch("/api/goal");
       const data = await res.json();
-      if (data.goal) {
-        setGoal(data.goal);
-      }
+      if (data.goal) setGoal(data.goal);
     } catch (error) {
       console.error("Error loading user goal:", error);
     } finally {
@@ -58,9 +49,7 @@ export default function CalorieTrackerApp() {
     try {
       const res = await fetch(`/api/entries?date=${date}`);
       const data = await res.json();
-      if (data.entries) {
-        setEntries(data.entries);
-      }
+      if (data.entries) setEntries(data.entries);
     } catch (error) {
       console.error("Error loading entries:", error);
     }
@@ -73,10 +62,7 @@ export default function CalorieTrackerApp() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ goal: newGoal }),
       });
-
-      if (res.ok) {
-        setGoal(newGoal);
-      }
+      if (res.ok) setGoal(newGoal);
     } catch (error) {
       console.error("Error updating goal:", error);
     }
@@ -84,17 +70,13 @@ export default function CalorieTrackerApp() {
 
   const dayEntries = useMemo(() => {
     return entries.filter((e) => {
-      // Convert both dates to YYYY-MM-DD format in Indian timezone
       const entryDate = new Date(e.date).toLocaleDateString("en-CA", {
         timeZone: "Asia/Kolkata",
       });
       const currentDate = new Date(date + "T12:00:00").toLocaleDateString(
         "en-CA",
-        {
-          timeZone: "Asia/Kolkata",
-        }
+        { timeZone: "Asia/Kolkata" }
       );
-
       return entryDate === currentDate;
     });
   }, [entries, date]);
@@ -158,7 +140,6 @@ export default function CalorieTrackerApp() {
 
   async function addOrUpdateEntry(e) {
     e.preventDefault();
-
     const payload = {
       id: editingId || uid(),
       name: form.name.trim() || "Food",
@@ -171,29 +152,23 @@ export default function CalorieTrackerApp() {
 
     try {
       if (editingId) {
-        // Update existing entry
         const res = await fetch("/api/entries", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ entryId: editingId, ...payload }),
         });
-
         if (res.ok) {
           setEntries((prev) =>
             prev.map((x) => (x.id === editingId ? payload : x))
           );
         }
       } else {
-        // Create new entry
         const res = await fetch("/api/entries", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
-
-        if (res.ok) {
-          setEntries((prev) => [payload, ...prev]);
-        }
+        if (res.ok) setEntries((prev) => [payload, ...prev]);
       }
       resetForm();
     } catch (error) {
@@ -215,10 +190,7 @@ export default function CalorieTrackerApp() {
 
   async function onDelete(id) {
     try {
-      const res = await fetch(`/api/entries?id=${id}`, {
-        method: "DELETE",
-      });
-
+      const res = await fetch(`/api/entries?id=${id}`, { method: "DELETE" });
       if (res.ok) {
         setEntries((prev) => prev.filter((e) => e.id !== id));
         if (editingId === id) resetForm();
@@ -245,13 +217,20 @@ export default function CalorieTrackerApp() {
 
   return (
     <div className="min-h-screen bg-zinc-100 text-zinc-900">
-      <div className="mx-auto max-w-md p-4 sm:p-6">
-        <header className="pb-4">
-          <h1 className="text-2xl font-bold">Calorie tracker</h1>
-          <p className="text-sm text-zinc-600">Hi {user?.primaryEmail}</p>
+      <div className="mx-auto max-w-4xl p-4 sm:p-6 lg:p-10">
+        {/* Header */}
+        <header className="pb-4 sm:pb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold sm:text-3xl">Calorie tracker</h1>
+            <p className="text-sm text-zinc-600">Hi {user?.primaryEmail}</p>
+          </div>
+          <div className="mt-2 sm:mt-0 text-sm text-zinc-500">
+            {new Date(date).toLocaleDateString("en-IN", { weekday: "long" })}
+          </div>
         </header>
 
-        <section className="grid grid-cols-2 gap-3 rounded-2xl bg-white p-4 shadow">
+        {/* Stats + Chart */}
+        <section className="grid gap-4 rounded-2xl bg-white p-4 shadow sm:grid-cols-2 lg:grid-cols-3">
           <div className="flex flex-col">
             <label className="text-xs text-zinc-500">Date</label>
             <input
@@ -273,191 +252,202 @@ export default function CalorieTrackerApp() {
             />
           </div>
 
-          <div className="col-span-2">
-            <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="rounded-xl bg-zinc-50 p-3">
-                <p className="text-xs text-zinc-500">Consumed</p>
-                <p className="text-xl font-semibold">{totals.calories}</p>
-              </div>
-              <div className="rounded-xl bg-zinc-50 p-3">
-                <p className="text-xs text-zinc-500">Left</p>
-                <p
-                  className={`text-xl font-semibold ${
-                    remaining === 0 ? "text-rose-600" : ""
-                  }`}
-                >
-                  {remaining}
-                </p>
-              </div>
-              <div className="rounded-xl bg-zinc-50 p-3">
-                <p className="text-xs text-zinc-500">Goal</p>
-                <p className="text-xl font-semibold">{goal}</p>
-              </div>
+          {/* Totals */}
+          <div className="col-span-full lg:col-span-1 grid grid-cols-3 gap-2 text-center">
+            <div className="rounded-xl bg-zinc-50 p-3">
+              <p className="text-xs text-zinc-500">Consumed</p>
+              <p className="text-xl font-semibold">{totals.calories}</p>
+            </div>
+            <div className="rounded-xl bg-zinc-50 p-3">
+              <p className="text-xs text-zinc-500">Left</p>
+              <p
+                className={`text-xl font-semibold ${
+                  remaining === 0 ? "text-rose-600" : ""
+                }`}
+              >
+                {remaining}
+              </p>
+            </div>
+            <div className="rounded-xl bg-zinc-50 p-3">
+              <p className="text-xs text-zinc-500">Goal</p>
+              <p className="text-xl font-semibold">{goal}</p>
             </div>
           </div>
 
-          <div className="col-span-2 h-40">
+          {/* Chart */}
+          <div className="col-span-full h-48 sm:h-56 lg:h-64 relative">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={chartData}
                   dataKey="value"
-                  nameKey="name"
-                  innerRadius={50}
-                  outerRadius={70}
+                  innerRadius="65%"
+                  outerRadius="80%"
                   startAngle={90}
-                  endAngle={-270} // clockwise
-                  paddingAngle={0}
+                  endAngle={-270}
                 >
                   {chartData.map((entry, index) => (
-                    <Cell key={`c-${index}`} fill={COLORS[index]} />
+                    <Cell key={index} fill={["#4caf50", "#e0e0e0"][index]} />
                   ))}
                 </Pie>
-                <Tooltip />
               </PieChart>
             </ResponsiveContainer>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <p className="text-lg sm:text-xl font-semibold">
+                {Math.round((totals.calories / goal) * 100)}%
+              </p>
+            </div>
           </div>
         </section>
 
-        <section className="mt-4 rounded-2xl bg-white p-4 shadow">
-          <h2 className="mb-3 text-lg font-semibold">Add food</h2>
-          <form onSubmit={addOrUpdateEntry} className="grid grid-cols-2 gap-2">
-            <div className="col-span-2 flex gap-2">
-              <input
-                placeholder="Name"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="flex-1 rounded-xl border p-2 outline-none"
-              />
-              <button
-                type="button"
-                onClick={() => fetchMacrosFromGemini(form.name)}
-                disabled={!form.name || loadingMacros}
-                className="rounded-xl bg-blue-500 px-3 text-white disabled:opacity-50"
-              >
-                {loadingMacros ? "..." : "Auto"}
-              </button>
-            </div>
-
-            <input
-              type="number"
-              inputMode="numeric"
-              placeholder="Calories"
-              value={form.calories}
-              onChange={(e) => setForm({ ...form, calories: e.target.value })}
-              className="rounded-xl border p-2 outline-none"
-            />
-            <input
-              type="number"
-              inputMode="numeric"
-              placeholder="Protein g"
-              value={form.protein}
-              onChange={(e) => setForm({ ...form, protein: e.target.value })}
-              className="rounded-xl border p-2 outline-none"
-            />
-            <input
-              type="number"
-              inputMode="numeric"
-              placeholder="Carbs g"
-              value={form.carbs}
-              onChange={(e) => setForm({ ...form, carbs: e.target.value })}
-              className="rounded-xl border p-2 outline-none"
-            />
-            <input
-              type="number"
-              inputMode="numeric"
-              placeholder="Fat g"
-              value={form.fat}
-              onChange={(e) => setForm({ ...form, fat: e.target.value })}
-              className="rounded-xl border p-2 outline-none"
-            />
-
-            <div className="col-span-2 flex gap-2">
-              <button
-                type="submit"
-                className="flex-1 rounded-2xl bg-zinc-900 p-3 text-white shadow active:translate-y-px"
-              >
-                {editingId ? "Update" : "Add"}
-              </button>
-              {editingId ? (
+        {/* Food form + entries */}
+        <section className="mt-4 grid gap-4 lg:grid-cols-2">
+          {/* Add food */}
+          <div className="rounded-2xl bg-white p-4 shadow">
+            <h2 className="mb-3 text-lg font-semibold">Add food</h2>
+            <form
+              onSubmit={addOrUpdateEntry}
+              className="grid grid-cols-2 gap-2"
+            >
+              <div className="col-span-2 flex gap-2">
+                <input
+                  placeholder="Name"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  className="flex-1 rounded-xl border p-2 outline-none"
+                />
                 <button
                   type="button"
-                  onClick={resetForm}
-                  className="rounded-2xl bg-zinc-200 px-4 text-zinc-900"
+                  onClick={() => fetchMacrosFromGemini(form.name)}
+                  disabled={!form.name || loadingMacros}
+                  className="rounded-xl bg-blue-500 px-3 text-white disabled:opacity-50"
                 >
-                  Cancel
+                  {loadingMacros ? "..." : "Auto"}
                 </button>
-              ) : null}
-            </div>
-          </form>
-        </section>
+              </div>
 
-        <section className="mt-4 rounded-2xl bg-white p-4 shadow">
-          <div className="mb-2 flex items-center gap-2">
-            <h2 className="text-lg font-semibold">Today entries</h2>
-            <div className="ml-auto" />
-            <input
-              placeholder="Search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="rounded-xl border p-2 text-sm outline-none"
-            />
-          </div>
-          <div className="text-xs text-zinc-500 mb-2">
-            Tap an item to edit. Swipe left to delete on touch devices
-          </div>
-          <ul className="divide-y">
-            <AnimatePresence initial={false}>
-              {filtered.map((item) => (
-                <motion.li
-                  key={item.id}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  className="flex items-center gap-3 py-3"
+              <input
+                type="number"
+                inputMode="numeric"
+                placeholder="Calories"
+                value={form.calories}
+                onChange={(e) => setForm({ ...form, calories: e.target.value })}
+                className="rounded-xl border p-2 outline-none"
+              />
+              <input
+                type="number"
+                inputMode="numeric"
+                placeholder="Protein g"
+                value={form.protein}
+                onChange={(e) => setForm({ ...form, protein: e.target.value })}
+                className="rounded-xl border p-2 outline-none"
+              />
+              <input
+                type="number"
+                inputMode="numeric"
+                placeholder="Carbs g"
+                value={form.carbs}
+                onChange={(e) => setForm({ ...form, carbs: e.target.value })}
+                className="rounded-xl border p-2 outline-none"
+              />
+              <input
+                type="number"
+                inputMode="numeric"
+                placeholder="Fat g"
+                value={form.fat}
+                onChange={(e) => setForm({ ...form, fat: e.target.value })}
+                className="rounded-xl border p-2 outline-none"
+              />
+
+              <div className="col-span-2 flex gap-2">
+                <button
+                  type="submit"
+                  className="flex-1 rounded-2xl bg-zinc-900 p-3 text-white shadow active:translate-y-px"
                 >
+                  {editingId ? "Update" : "Add"}
+                </button>
+                {editingId ? (
                   <button
-                    onClick={() => onEdit(item)}
-                    className="flex-1 text-left"
+                    type="button"
+                    onClick={resetForm}
+                    className="rounded-2xl bg-zinc-200 px-4 text-zinc-900"
                   >
-                    <p className="font-medium">{item.name}</p>
-                    <p className="text-sm text-zinc-500">
-                      {item.calories} kcal · P {item.protein} C {item.carbs} F{" "}
-                      {item.fat}
-                    </p>
+                    Cancel
                   </button>
-                  <button
-                    aria-label="Delete"
-                    onClick={() => onDelete(item.id)}
-                    className="rounded-xl bg-rose-100 px-3 py-1 text-rose-700 active:translate-y-px"
+                ) : null}
+              </div>
+            </form>
+          </div>
+
+          {/* Entries list */}
+          <div className="rounded-2xl bg-white p-4 shadow">
+            <div className="mb-2 flex items-center gap-2">
+              <h2 className="text-lg font-semibold">Today entries</h2>
+              <div className="ml-auto" />
+              <input
+                placeholder="Search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="rounded-xl border p-2 text-sm outline-none"
+              />
+            </div>
+            <div className="text-xs text-zinc-500 mb-2">
+              Tap an item to edit. Swipe left to delete on touch devices
+            </div>
+            <ul className="divide-y max-h-64 overflow-y-auto">
+              <AnimatePresence initial={false}>
+                {filtered.map((item) => (
+                  <motion.li
+                    key={item.id}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    className="flex items-center gap-3 py-3"
                   >
-                    Delete
-                  </button>
-                </motion.li>
-              ))}
-            </AnimatePresence>
-          </ul>
+                    <button
+                      onClick={() => onEdit(item)}
+                      className="flex-1 text-left"
+                    >
+                      <p className="font-medium">{item.name}</p>
+                      <p className="text-sm text-zinc-500">
+                        {item.calories} kcal · P {item.protein} C {item.carbs} F{" "}
+                        {item.fat}
+                      </p>
+                    </button>
+                    <button
+                      aria-label="Delete"
+                      onClick={() => onDelete(item.id)}
+                      className="rounded-xl bg-rose-100 px-3 py-1 text-rose-700 active:translate-y-px"
+                    >
+                      Delete
+                    </button>
+                  </motion.li>
+                ))}
+              </AnimatePresence>
+            </ul>
 
-          {filtered.length === 0 ? (
-            <p className="py-6 text-center text-zinc-500">No items yet</p>
-          ) : null}
+            {filtered.length === 0 ? (
+              <p className="py-6 text-center text-zinc-500">No items yet</p>
+            ) : null}
 
-          <div className="mt-4 grid grid-cols-3 gap-2 text-center text-sm">
-            <div className="rounded-xl bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Protein</p>
-              <p className="font-semibold">{totals.protein} g</p>
-            </div>
-            <div className="rounded-xl bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Carbs</p>
-              <p className="font-semibold">{totals.carbs} g</p>
-            </div>
-            <div className="rounded-xl bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Fat</p>
-              <p className="font-semibold">{totals.fat} g</p>
+            <div className="mt-4 grid grid-cols-3 gap-2 text-center text-sm">
+              <div className="rounded-xl bg-zinc-50 p-3">
+                <p className="text-xs text-zinc-500">Protein</p>
+                <p className="font-semibold">{totals.protein} g</p>
+              </div>
+              <div className="rounded-xl bg-zinc-50 p-3">
+                <p className="text-xs text-zinc-500">Carbs</p>
+                <p className="font-semibold">{totals.carbs} g</p>
+              </div>
+              <div className="rounded-xl bg-zinc-50 p-3">
+                <p className="text-xs text-zinc-500">Fat</p>
+                <p className="font-semibold">{totals.fat} g</p>
+              </div>
             </div>
           </div>
         </section>
 
+        {/* Footer */}
         <footer className="py-8 text-center text-xs text-zinc-500">
           <p>Tip: press P C or F while typing to jump between fields</p>
         </footer>
