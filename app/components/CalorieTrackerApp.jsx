@@ -221,7 +221,7 @@ export default function CalorieTrackerApp() {
         {/* Header */}
         <header className="pb-4 sm:pb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold sm:text-3xl">Calorie tracker</h1>
+            <h1 className="text-2xl font-bold sm:text-3xl">Min-Max</h1>
             <p className="text-sm text-zinc-600">Hi {user?.primaryEmail}</p>
           </div>
           <div className="mt-2 sm:mt-0 text-sm text-zinc-500">
@@ -449,7 +449,6 @@ export default function CalorieTrackerApp() {
 
         {/* Footer */}
         <footer className="py-8 text-center text-xs text-zinc-500">
-          <p>Tip: press P C or F while typing to jump between fields</p>
         </footer>
       </div>
     </div>

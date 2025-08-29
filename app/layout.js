@@ -14,5 +14,5 @@ export default function RootLayout({ children }) {
 }
 
 export const metadata = {
-  title: 'Calorie Tracker',
+  title: 'Min-Maxer',
 }
