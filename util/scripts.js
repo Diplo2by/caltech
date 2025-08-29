@@ -1,6 +1,5 @@
 export function todayISO() {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
+    const d = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
     return d.toISOString().slice(0, 10);
 }
 

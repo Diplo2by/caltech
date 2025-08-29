@@ -2,16 +2,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PieChart, Pie, ResponsiveContainer, Cell, Tooltip } from "recharts";
-import { useRouter } from "next/navigation";
 import { useUser } from "@stackframe/stack";
-import { todayISO } from "@/util/scripts";
-import { loadJSON, saveJSON, STORAGE_KEYS } from "@/util/storage";
+import { todayISO, numberOrZero, uid } from "@/util/scripts";
+
 export default function CalorieTrackerApp() {
-  const [entries, setEntries] = useState(() =>
-    loadJSON(STORAGE_KEYS.entries, [])
-  );
-  const [goal, setGoal] = useState(() => loadJSON(STORAGE_KEYS.goal, 2000));
+  const [entries, setEntries] = useState([]);
+  const [goal, setGoal] = useState(2000);
   const [date, setDate] = useState(todayISO());
+  const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({
     id: "",
     name: "",
@@ -23,23 +21,90 @@ export default function CalorieTrackerApp() {
   const [editingId, setEditingId] = useState("");
   const [search, setSearch] = useState("");
   const [loadingMacros, setLoadingMacros] = useState(false);
+
+  // const { user, isSignedIn } = useUser();
   const user = useUser();
+  const isSignedIn = user ? true : false;
 
-  useEffect(() => saveJSON(STORAGE_KEYS.entries, entries), [entries]);
-  useEffect(() => saveJSON(STORAGE_KEYS.goal, goal), [goal]);
+  // Load user goal and entries when component mounts or date changes
+  useEffect(() => {
+    if (isSignedIn) {
+      loadUserData();
+    }
+  }, [isSignedIn]);
 
-  const dayEntries = useMemo(
-    () => entries.filter((e) => e.date === date),
-    [entries, date]
-  );
+  useEffect(() => {
+    if (isSignedIn) {
+      loadEntries();
+    }
+  }, [date, isSignedIn]);
+
+  async function loadUserData() {
+    try {
+      const res = await fetch("/api/goal");
+      const data = await res.json();
+      if (data.goal) {
+        setGoal(data.goal);
+      }
+    } catch (error) {
+      console.error("Error loading user goal:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function loadEntries() {
+    try {
+      const res = await fetch(`/api/entries?date=${date}`);
+      const data = await res.json();
+      if (data.entries) {
+        setEntries(data.entries);
+      }
+    } catch (error) {
+      console.error("Error loading entries:", error);
+    }
+  }
+
+  async function updateGoal(newGoal) {
+    try {
+      const res = await fetch("/api/goal", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ goal: newGoal }),
+      });
+
+      if (res.ok) {
+        setGoal(newGoal);
+      }
+    } catch (error) {
+      console.error("Error updating goal:", error);
+    }
+  }
+
+  const dayEntries = useMemo(() => {
+    return entries.filter((e) => {
+      // Convert both dates to YYYY-MM-DD format in Indian timezone
+      const entryDate = new Date(e.date).toLocaleDateString("en-CA", {
+        timeZone: "Asia/Kolkata",
+      });
+      const currentDate = new Date(date + "T12:00:00").toLocaleDateString(
+        "en-CA",
+        {
+          timeZone: "Asia/Kolkata",
+        }
+      );
+
+      return entryDate === currentDate;
+    });
+  }, [entries, date]);
 
   const totals = useMemo(() => {
     return dayEntries.reduce(
       (acc, e) => {
-        acc.calories += e.calories;
-        acc.protein += e.protein;
-        acc.carbs += e.carbs;
-        acc.fat += e.fat;
+        acc.calories += e.calories || 0;
+        acc.protein += e.protein || 0;
+        acc.carbs += e.carbs || 0;
+        acc.fat += e.fat || 0;
         return acc;
       },
       { calories: 0, protein: 0, carbs: 0, fat: 0 }
@@ -90,8 +155,9 @@ export default function CalorieTrackerApp() {
     }
   }
 
-  function addOrUpdateEntry(e) {
+  async function addOrUpdateEntry(e) {
     e.preventDefault();
+
     const payload = {
       id: editingId || uid(),
       name: form.name.trim() || "Food",
@@ -102,12 +168,36 @@ export default function CalorieTrackerApp() {
       date,
     };
 
-    if (editingId) {
-      setEntries((prev) => prev.map((x) => (x.id === editingId ? payload : x)));
-    } else {
-      setEntries((prev) => [payload, ...prev]);
+    try {
+      if (editingId) {
+        // Update existing entry
+        const res = await fetch("/api/entries", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ entryId: editingId, ...payload }),
+        });
+
+        if (res.ok) {
+          setEntries((prev) =>
+            prev.map((x) => (x.id === editingId ? payload : x))
+          );
+        }
+      } else {
+        // Create new entry
+        const res = await fetch("/api/entries", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
+          setEntries((prev) => [payload, ...prev]);
+        }
+      }
+      resetForm();
+    } catch (error) {
+      console.error("Error saving entry:", error);
     }
-    resetForm();
   }
 
   function onEdit(item) {
@@ -115,31 +205,49 @@ export default function CalorieTrackerApp() {
     setForm({
       id: item.id,
       name: item.name,
-      calories: String(item.calories),
-      protein: String(item.protein),
-      carbs: String(item.carbs),
-      fat: String(item.fat),
+      calories: String(item.calories || ""),
+      protein: String(item.protein || ""),
+      carbs: String(item.carbs || ""),
+      fat: String(item.fat || ""),
     });
   }
 
-  function onDelete(id) {
-    setEntries((prev) => prev.filter((e) => e.id !== id));
-    if (editingId === id) resetForm();
+  async function onDelete(id) {
+    try {
+      const res = await fetch(`/api/entries?id=${id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        setEntries((prev) => prev.filter((e) => e.id !== id));
+        if (editingId === id) resetForm();
+      }
+    } catch (error) {
+      console.error("Error deleting entry:", error);
+    }
   }
 
   const filtered = dayEntries.filter((e) =>
     e.name.toLowerCase().includes(search.toLowerCase())
   );
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-zinc-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin h-8 w-8 border-2 border-zinc-900 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-zinc-600">Loading your data...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-zinc-100 text-zinc-900">
       <div className="mx-auto max-w-md p-4 sm:p-6">
         <header className="pb-4">
           <h1 className="text-2xl font-bold">Calorie tracker</h1>
-          <p className="text-sm text-zinc-600">
-            Hi {user.primaryEmail} DB {getDBVersion()} hi{" "}
-            {process.env.STACK_SECRET_SERVER_KEY}
-          </p>
+          <p className="text-sm text-zinc-600">Hi {user?.primaryEmail}</p>
         </header>
 
         <section className="grid grid-cols-2 gap-3 rounded-2xl bg-white p-4 shadow">
@@ -159,7 +267,7 @@ export default function CalorieTrackerApp() {
               min={0}
               inputMode="numeric"
               value={goal}
-              onChange={(e) => setGoal(numberOrZero(e.target.value))}
+              onChange={(e) => updateGoal(numberOrZero(e.target.value))}
               className="rounded-xl border p-2 outline-none"
             />
           </div>
@@ -348,7 +456,7 @@ export default function CalorieTrackerApp() {
         </section>
 
         <footer className="py-8 text-center text-xs text-zinc-500">
-          <p>Tip press P C or F while typing to jump between fields</p>
+          <p>Tip: press P C or F while typing to jump between fields</p>
         </footer>
       </div>
     </div>
