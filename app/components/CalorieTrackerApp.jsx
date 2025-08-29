@@ -21,6 +21,7 @@ export default function CalorieTrackerApp() {
   const [editingId, setEditingId] = useState("");
   const [search, setSearch] = useState("");
   const [loadingMacros, setLoadingMacros] = useState(false);
+  const COLORS = ["#4caf50", "#e0e0e0"];
 
   // const { user, isSignedIn } = useUser();
   const user = useUser();
@@ -304,10 +305,12 @@ export default function CalorieTrackerApp() {
                   nameKey="name"
                   innerRadius={50}
                   outerRadius={70}
-                  paddingAngle={2}
+                  startAngle={90}
+                  endAngle={-270} // clockwise
+                  paddingAngle={0}
                 >
                   {chartData.map((entry, index) => (
-                    <Cell key={`c-${index}`} />
+                    <Cell key={`c-${index}`} fill={COLORS[index]} />
                   ))}
                 </Pie>
                 <Tooltip />
