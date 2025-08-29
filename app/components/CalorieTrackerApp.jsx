@@ -4,44 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { PieChart, Pie, ResponsiveContainer, Cell, Tooltip } from "recharts";
 import { useRouter } from "next/navigation";
 import { useUser } from "@stackframe/stack";
-
-const STORAGE_KEYS = {
-  entries: "ct_entries_v1",
-  goal: "ct_goal_v1",
-};
-
-function todayISO() {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d.toISOString().slice(0, 10);
-}
-
-function loadJSON(key, fallback) {
-  try {
-    const raw =
-      typeof window !== "undefined" ? window.localStorage.getItem(key) : null;
-    return raw ? JSON.parse(raw) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function saveJSON(key, value) {
-  try {
-    if (typeof window !== "undefined")
-      window.localStorage.setItem(key, JSON.stringify(value));
-  } catch {}
-}
-
-function uid() {
-  return Math.random().toString(36).slice(2) + Date.now().toString(36);
-}
-
-function numberOrZero(v) {
-  const n = Number(v);
-  return Number.isFinite(n) ? n : 0;
-}
-
+import { todayISO } from "@/util/scripts";
+import { loadJSON, saveJSON, STORAGE_KEYS } from "@/util/storage";
 export default function CalorieTrackerApp() {
   const [entries, setEntries] = useState(() =>
     loadJSON(STORAGE_KEYS.entries, [])
@@ -59,6 +23,7 @@ export default function CalorieTrackerApp() {
   const [editingId, setEditingId] = useState("");
   const [search, setSearch] = useState("");
   const [loadingMacros, setLoadingMacros] = useState(false);
+  const user = useUser();
 
   useEffect(() => saveJSON(STORAGE_KEYS.entries, entries), [entries]);
   useEffect(() => saveJSON(STORAGE_KEYS.goal, goal), [goal]);
@@ -172,7 +137,8 @@ export default function CalorieTrackerApp() {
         <header className="pb-4">
           <h1 className="text-2xl font-bold">Calorie tracker</h1>
           <p className="text-sm text-zinc-600">
-            Fast simple private. Saved in your browser
+            Hi {user.primaryEmail} DB {getDBVersion()} hi{" "}
+            {process.env.STACK_SECRET_SERVER_KEY}
           </p>
         </header>
 
