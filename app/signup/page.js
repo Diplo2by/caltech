@@ -1,5 +1,5 @@
 'use client'
-import { CredentialSignIn } from '@stackframe/stack'
+import { CredentialSignUp } from '@stackframe/stack'
 import React from 'react'
 
 const page = () => {
@@ -33,14 +33,14 @@ const page = () => {
                 {/* Sign in container */}
                 <div className="rounded-2xl bg-teal-50 backdrop-blur-sm border border-gray-800 p-6 sm:p-8 shadow-2xl">
                     <div className="mb-6 text-center">
-                        <h2 className="text-lg sm:text-xl font-semibold text-black mb-1">Welcome back</h2>
-                        <p className="text-gray-400 text-sm">Sign in to continue tracking</p>
+                        <h2 className="text-lg sm:text-xl font-semibold text-black mb-1">Welcome Onboard!</h2>
+                        <p className="text-gray-400 text-sm">Sign up to continue tracking</p>
                     </div>
 
                     {/* Custom styling for CredentialSignIn component */}
 
                     <div className="credential-signin-container">
-                        <CredentialSignIn />
+                        <CredentialSignUp />
                     </div>
                 </div>
 
