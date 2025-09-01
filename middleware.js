@@ -12,6 +12,6 @@ export async function middleware(request) {
 
 export const config = {
     matcher: [
-        '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|signin|signup|api|public|assets).*)',
+        '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|signin|signup|api|public|assets|forgot-password).*)',
     ],
 };
