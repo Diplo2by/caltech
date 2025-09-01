@@ -282,7 +282,7 @@ export default function CalorieTrackerApp() {
 
           {/* Totals */}
           <div className="col-span-full lg:col-span-1 grid grid-cols-3 gap-3 text-center">
-            <div className="rounded-lg bg-gray-800 border border-gray-700 p-4">
+            <div className="rounded-lg bg-gray-800 border border-gray-700 p-4 px-2">
               <p className="text-xs text-gray-400 font-medium">Consumed</p>
               <p className="text-xl font-bold text-white">{totals.calories}</p>
             </div>
