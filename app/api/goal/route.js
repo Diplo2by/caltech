@@ -32,7 +32,7 @@ export async function PUT(request) {
         }
 
         // Ensure user exists in database
-        await createUser(userId, user.emailAddresses[0]?.emailAddress || "");
+        await createUser(userId, user.primaryEmail || "");
 
         const { goal } = await request.json();
 

@@ -56,15 +56,23 @@ export default function CalorieTrackerApp() {
   }
 
   async function updateGoal(newGoal) {
+    // Update UI immediately for better UX
+    setGoal(newGoal);
+
     try {
       const res = await fetch("/api/goal", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ goal: newGoal }),
       });
-      if (res.ok) setGoal(newGoal);
+      if (!res.ok) {
+        // Revert on failure
+        console.error("Failed to update goal");
+        loadUserData(); // Reload the actual goal from server
+      }
     } catch (error) {
       console.error("Error updating goal:", error);
+      loadUserData(); // Reload the actual goal from server
     }
   }
 
