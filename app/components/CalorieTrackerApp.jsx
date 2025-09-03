@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PieChart, Pie, ResponsiveContainer, Cell } from "recharts";
-import { useUser } from "@stackframe/stack";
+import { UserButton, useUser } from "@stackframe/stack";
 import { todayISO, numberOrZero, uid } from "@/util/scripts";
 
 export default function CalorieTrackerApp() {
@@ -246,6 +246,9 @@ export default function CalorieTrackerApp() {
           <div className="mt-2 sm:mt-0 text-sm text-gray-500">
             {new Date(date).toLocaleDateString("en-IN", { weekday: "long" })}
           </div>
+          <div className=" text-teal-900">
+            <UserButton/>
+          </div>
         </motion.header>
 
         {/* Stats + Chart */}
@@ -282,7 +285,7 @@ export default function CalorieTrackerApp() {
 
           {/* Totals */}
           <div className="col-span-full lg:col-span-1 grid grid-cols-3 gap-3 text-center">
-            <div className="rounded-lg bg-gray-800 border border-gray-700 p-4 px-2">
+            <div className="rounded-lg bg-gray-800 border border-gray-700 p-4 px2">
               <p className="text-xs text-gray-400 font-medium">Consumed</p>
               <p className="text-xl font-bold text-white">{totals.calories}</p>
             </div>
