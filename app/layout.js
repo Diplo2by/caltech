@@ -24,7 +24,7 @@ export const metadata = {
     description: 'Your Calorie Compass',
     siteName: 'Calibra',
     images: [{
-      url: '/og-img.png',
+      url: '/assets/og-img.png',
       width: 1200,
       height: 630,
     }]
