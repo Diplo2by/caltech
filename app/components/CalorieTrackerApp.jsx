@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PieChart, Pie, ResponsiveContainer, Cell } from "recharts";
 import { UserButton, useUser } from "@stackframe/stack";
-import { todayISO, numberOrZero, uid } from "@/util/scripts";
+import { todayISO, numberOrZero, uid, convertDecimal } from "@/util/scripts";
 
 export default function CalorieTrackerApp() {
   const [entries, setEntries] = useState([]);
@@ -21,6 +21,8 @@ export default function CalorieTrackerApp() {
   const [editingId, setEditingId] = useState("");
   const [search, setSearch] = useState("");
   const [loadingMacros, setLoadingMacros] = useState(false);
+  const [allFoods, setAllFoods] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
 
   const user = useUser();
   const isSignedIn = !!user;
@@ -32,6 +34,19 @@ export default function CalorieTrackerApp() {
   useEffect(() => {
     if (isSignedIn) loadEntries();
   }, [date, isSignedIn]);
+
+  useEffect(() => {
+    async function loadFoodData() {
+      try {
+        const res = await fetch("/foods.json");
+        const data = await res.json();
+        setAllFoods(data);
+      } catch (error) {
+        console.error("Failed to load food data:", error);
+      }
+    }
+    loadFoodData();
+  }, []);
 
   async function loadUserData() {
     try {
@@ -143,6 +158,7 @@ export default function CalorieTrackerApp() {
       console.error("Gemini error", err);
     } finally {
       setLoadingMacros(false);
+      setSuggestions([]);
     }
   }
 
@@ -206,6 +222,31 @@ export default function CalorieTrackerApp() {
     } catch (error) {
       console.error("Error deleting entry:", error);
     }
+  }
+  function handleNameChange(e) {
+    const value = e.target.value;
+    setForm({ ...form, name: value });
+
+    if (value.length > 1) {
+      const filtered = allFoods.filter((food) =>
+        food.name.toLowerCase().includes(value.toLowerCase())
+      );
+      setSuggestions(filtered);
+    } else {
+      setSuggestions([]);
+    }
+  }
+
+  function handleSuggestionClick(food) {
+    setForm((prev) => ({
+      ...prev,
+      name: food.name,
+      calories: String(food.calories || ""),
+      protein: String(food.protein || ""),
+      carbs: String(food.carbs || ""),
+      fat: String(food.fat || ""),
+    }));
+    setSuggestions([]); // Hide dropdown after selection
   }
 
   const filtered = dayEntries.filter((e) =>
@@ -285,23 +326,25 @@ export default function CalorieTrackerApp() {
 
           {/* Totals */}
           <div className="col-span-full lg:col-span-1 grid grid-cols-3 gap-3 text-center">
-            <div className="rounded-lg bg-gray-800 border border-gray-700 p-4 px2">
+            <div className="rounded-lg bg-gray-800 border border-gray-700 p-4 px-2">
               <p className="text-xs text-gray-400 font-medium">Consumed</p>
-              <p className="text-xl font-bold text-white">{totals.calories}</p>
+              <p className="text-md font-bold text-white">
+                {convertDecimal(totals.calories)}
+              </p>
             </div>
-            <div className="rounded-lg bg-gray-800 border border-gray-700 p-4">
+            <div className="rounded-lg bg-gray-800 border border-gray-700 p-4 px-2">
               <p className="text-xs text-gray-400 font-medium">Left</p>
               <p
-                className={`text-xl font-bold ${
+                className={`text-md font-bold ${
                   remaining === 0 ? "text-red-400" : "text-white"
                 }`}
               >
-                {remaining}
+                {convertDecimal(remaining)}
               </p>
             </div>
             <div className="rounded-lg bg-gray-800 border border-gray-700 p-4">
               <p className="text-xs text-gray-400 font-medium">Goal</p>
-              <p className="text-xl font-bold text-white">{goal}</p>
+              <p className="text-md font-bold text-white">{goal}</p>
             </div>
           </div>
 
@@ -350,25 +393,53 @@ export default function CalorieTrackerApp() {
               className="grid grid-cols-2 gap-3"
             >
               <div className="col-span-2 flex gap-2">
-                <div className="flex-1">
+                <div className="flex-1 relative">
                   <label className="block text-sm font-medium text-gray-300 mb-1">
                     Food name
                   </label>
                   <input
                     placeholder="Enter food name"
                     value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    onChange={handleNameChange}
+                    autoComplete="off" // Prevent browser autocomplete from interfering
                     className="w-full rounded-lg border border-gray-700 bg-gray-800 p-3 text-white placeholder-gray-500 outline-none focus:border-gray-600 transition-colors"
                   />
+                  <AnimatePresence>
+                    {suggestions.length > 0 && !loadingMacros && (
+                      <motion.ul
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="absolute z-10 w-full mt-1 max-h-40 overflow-y-auto rounded-lg bg-gray-800 border border-gray-700 shadow-lg"
+                      >
+                        {suggestions.map((food) => (
+                          <li
+                            key={food.name}
+                            onClick={() => handleSuggestionClick(food)}
+                            className="px-4 py-2 text-white hover:bg-gray-700 cursor-pointer"
+                          >
+                            {food.name}
+                          </li>
+                        ))}
+                      </motion.ul>
+                    )}
+                  </AnimatePresence>
                 </div>
                 <div className="flex flex-col justify-end">
                   <button
                     type="button"
                     onClick={() => fetchMacrosFromGemini(form.name)}
                     disabled={!form.name || loadingMacros}
-                    className="rounded-lg bg-gray-700 px-4 py-3 text-white hover:bg-gray-600 disabled:opacity-50 transition-colors"
+                    className={`
+      rounded-lg px-4 py-3 font-semibold text-white transition-all duration-300
+      ${
+        loadingMacros
+          ? "bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 bg-[length:200%_auto] animate-gradient-pan cursor-wait"
+          : "bg-gray-700 hover:bg-gray-600"
+      }
+    `}
                   >
-                    {loadingMacros ? "..." : "Auto"}
+                    {loadingMacros ? "..." : "Auto ✨"}
                   </button>
                 </div>
               </div>
@@ -511,15 +582,21 @@ export default function CalorieTrackerApp() {
             <div className="mt-6 grid grid-cols-3 gap-3 text-center text-sm">
               <div className="rounded-lg bg-gray-800 border border-gray-700 p-3">
                 <p className="text-xs text-gray-400 mb-1">Protein</p>
-                <p className="font-semibold text-white">{totals.protein}g</p>
+                <p className="font-semibold text-white">
+                  {convertDecimal(totals.protein)}g
+                </p>
               </div>
               <div className="rounded-lg bg-gray-800 border border-gray-700 p-3">
                 <p className="text-xs text-gray-400 mb-1">Carbs</p>
-                <p className="font-semibold text-white">{totals.carbs}g</p>
+                <p className="font-semibold text-white">
+                  {convertDecimal(totals.carbs)}g
+                </p>
               </div>
               <div className="rounded-lg bg-gray-800 border border-gray-700 p-3">
                 <p className="text-xs text-gray-400 mb-1">Fat</p>
-                <p className="font-semibold text-white">{totals.fat}g</p>
+                <p className="font-semibold text-white">
+                  {convertDecimal(totals.fat)}g
+                </p>
               </div>
             </div>
           </div>
