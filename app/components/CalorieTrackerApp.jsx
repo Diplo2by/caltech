@@ -239,7 +239,7 @@ export default function CalorieTrackerApp() {
         >
           <div>
             <h1 className="text-2xl font-bold text-white sm:text-3xl">
-              Min-Max
+              Calibra
             </h1>
             <p className="text-sm text-gray-400">{user?.primaryEmail}</p>
           </div>
