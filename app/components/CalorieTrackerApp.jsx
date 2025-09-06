@@ -400,7 +400,7 @@ export default function CalorieTrackerApp() {
                   <input
                     placeholder="Enter food name"
                     value={form.name}
-                    onChange={handleNameChange} 
+                    onChange={handleNameChange}
                     autoComplete="off" // Prevent browser autocomplete from interfering
                     className="w-full rounded-lg border border-gray-700 bg-gray-800 p-3 text-white placeholder-gray-500 outline-none focus:border-gray-600 transition-colors"
                   />
@@ -430,7 +430,14 @@ export default function CalorieTrackerApp() {
                     type="button"
                     onClick={() => fetchMacrosFromGemini(form.name)}
                     disabled={!form.name || loadingMacros}
-                    className="rounded-lg bg-gray-700 px-4 py-3 text-white hover:bg-gray-600 disabled:opacity-50 transition-colors"
+                    className={`
+      rounded-lg px-4 py-3 font-semibold text-white transition-all duration-300
+      ${
+        loadingMacros
+          ? "bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 bg-[length:200%_auto] animate-gradient-pan cursor-wait"
+          : "bg-gray-700 hover:bg-gray-600"
+      }
+    `}
                   >
                     {loadingMacros ? "..." : "Auto ✨"}
                   </button>
