@@ -22,6 +22,12 @@ export const metadata = {
   openGraph: {
     title: 'Calibra',
     description: 'Your Calorie Compass',
-    siteName: 'Calibra'
+    siteName: 'Calibra',
+    images: [{
+      url: '/og-img.png',
+      width: 1200,
+      height: 630,
+    }]
+
   }
 }
