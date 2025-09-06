@@ -26,8 +26,8 @@ const page = () => {
             <div className="relative z-10 w-full max-w-sm sm:max-w-md">
                 {/* Header */}
                 <div className="text-center mb-6 sm:mb-8">
-                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-2">Min-Max</h1>
-                    <p className="text-gray-400 text-base sm:text-lg">Track your nutrition journey</p>
+                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-2">Calibra</h1>
+                    <p className="text-gray-400 text-base sm:text-lg">Your Calorie Compass</p>
                     <div className="w-12 h-1 bg-gradient-to-r from-gray-600 to-gray-800 rounded-full mx-auto mt-3 sm:mt-4"></div>
                 </div>
 

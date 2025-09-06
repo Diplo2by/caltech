@@ -239,7 +239,7 @@ export default function CalorieTrackerApp() {
         >
           <div>
             <h1 className="text-2xl font-bold text-white sm:text-3xl">
-              Min-Max
+              Calibra
             </h1>
             <p className="text-sm text-gray-400">{user?.primaryEmail}</p>
           </div>
@@ -247,7 +247,7 @@ export default function CalorieTrackerApp() {
             {new Date(date).toLocaleDateString("en-IN", { weekday: "long" })}
           </div>
           <div className=" text-teal-900">
-            <UserButton/>
+            <UserButton />
           </div>
         </motion.header>
 
@@ -350,56 +350,90 @@ export default function CalorieTrackerApp() {
               className="grid grid-cols-2 gap-3"
             >
               <div className="col-span-2 flex gap-2">
-                <input
-                  placeholder="Food name"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="flex-1 rounded-lg border border-gray-700 bg-gray-800 p-3 text-white placeholder-gray-500 outline-none focus:border-gray-600 transition-colors"
-                />
-                <button
-                  type="button"
-                  onClick={() => fetchMacrosFromGemini(form.name)}
-                  disabled={!form.name || loadingMacros}
-                  className="rounded-lg bg-gray-700 px-4 text-white hover:bg-gray-600 disabled:opacity-50 transition-colors"
-                >
-                  {loadingMacros ? "..." : "Auto"}
-                </button>
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Food name
+                  </label>
+                  <input
+                    placeholder="Enter food name"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    className="w-full rounded-lg border border-gray-700 bg-gray-800 p-3 text-white placeholder-gray-500 outline-none focus:border-gray-600 transition-colors"
+                  />
+                </div>
+                <div className="flex flex-col justify-end">
+                  <button
+                    type="button"
+                    onClick={() => fetchMacrosFromGemini(form.name)}
+                    disabled={!form.name || loadingMacros}
+                    className="rounded-lg bg-gray-700 px-4 py-3 text-white hover:bg-gray-600 disabled:opacity-50 transition-colors"
+                  >
+                    {loadingMacros ? "..." : "Auto"}
+                  </button>
+                </div>
               </div>
 
-              <input
-                type="number"
-                inputMode="numeric"
-                placeholder="Calories"
-                value={form.calories}
-                onChange={(e) => setForm({ ...form, calories: e.target.value })}
-                className="rounded-lg border border-gray-700 bg-gray-800 p-3 text-white placeholder-gray-500 outline-none focus:border-gray-600 transition-colors"
-              />
-              <input
-                type="number"
-                inputMode="numeric"
-                placeholder="Protein g"
-                value={form.protein}
-                onChange={(e) => setForm({ ...form, protein: e.target.value })}
-                className="rounded-lg border border-gray-700 bg-gray-800 p-3 text-white placeholder-gray-500 outline-none focus:border-gray-600 transition-colors"
-              />
-              <input
-                type="number"
-                inputMode="numeric"
-                placeholder="Carbs g"
-                value={form.carbs}
-                onChange={(e) => setForm({ ...form, carbs: e.target.value })}
-                className="rounded-lg border border-gray-700 bg-gray-800 p-3 text-white placeholder-gray-500 outline-none focus:border-gray-600 transition-colors"
-              />
-              <input
-                type="number"
-                inputMode="numeric"
-                placeholder="Fat g"
-                value={form.fat}
-                onChange={(e) => setForm({ ...form, fat: e.target.value })}
-                className="rounded-lg border border-gray-700 bg-gray-800 p-3 text-white placeholder-gray-500 outline-none focus:border-gray-600 transition-colors"
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Calories
+                </label>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  placeholder="0"
+                  value={form.calories}
+                  onChange={(e) =>
+                    setForm({ ...form, calories: e.target.value })
+                  }
+                  className="w-full rounded-lg border border-gray-700 bg-gray-800 p-3 text-white placeholder-gray-500 outline-none focus:border-gray-600 transition-colors"
+                />
+              </div>
 
-              <div className="col-span-2 flex gap-2">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Protein (g)
+                </label>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  placeholder="0"
+                  value={form.protein}
+                  onChange={(e) =>
+                    setForm({ ...form, protein: e.target.value })
+                  }
+                  className="w-full rounded-lg border border-gray-700 bg-gray-800 p-3 text-white placeholder-gray-500 outline-none focus:border-gray-600 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Carbs (g)
+                </label>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  placeholder="0"
+                  value={form.carbs}
+                  onChange={(e) => setForm({ ...form, carbs: e.target.value })}
+                  className="w-full rounded-lg border border-gray-700 bg-gray-800 p-3 text-white placeholder-gray-500 outline-none focus:border-gray-600 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Fat (g)
+                </label>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  placeholder="0"
+                  value={form.fat}
+                  onChange={(e) => setForm({ ...form, fat: e.target.value })}
+                  className="w-full rounded-lg border border-gray-700 bg-gray-800 p-3 text-white placeholder-gray-500 outline-none focus:border-gray-600 transition-colors"
+                />
+              </div>
+
+              <div className="col-span-2 flex gap-2 mt-2">
                 <button
                   type="submit"
                   className="flex-1 rounded-lg bg-white text-black p-3 font-medium hover:bg-gray-200 transition-colors hover:cursor-pointer active:scale-105"
@@ -418,7 +452,6 @@ export default function CalorieTrackerApp() {
               </div>
             </form>
           </div>
-
           {/* Entries list */}
           <div className="rounded-2xl bg-gray-900/50 border border-gray-800 p-6">
             <div className="mb-4 flex items-center gap-3">
