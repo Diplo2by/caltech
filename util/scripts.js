@@ -11,3 +11,14 @@ export function numberOrZero(v) {
     const n = Number(v);
     return Number.isFinite(n) ? n : 0;
 }
+
+export function convertDecimal(num) {
+    try {
+        if (isNaN(parseFloat(num))) {
+            return '';
+        }
+        return (Math.round(num * 100) / 100).toFixed(2);
+    } catch (error) {
+        return "";
+    }
+}
