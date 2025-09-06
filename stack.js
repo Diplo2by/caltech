@@ -8,6 +8,7 @@ export const stackServerApp = new StackServerApp({
     signIn: '/signin',
     signUp: '/signup',
     forgotPassword: '/forgot-password',
-    accountSettings: '/account-settings'
+    accountSettings: '/account-settings',
+    afterSignOut: '/signin'
   }
 });
