@@ -5,6 +5,9 @@ import "./globals.css";
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <head>
+        <meta name="apple-mobile-web-app-title" content="Calibra" />
+      </head>
       <body>
         <StackProvider app={stackServerApp}><StackTheme>
           {children}
@@ -15,4 +18,10 @@ export default function RootLayout({ children }) {
 
 export const metadata = {
   title: 'Calibra',
+  description: 'Your Calorie Compass',
+  openGraph: {
+    title: 'Calibra',
+    description: 'Your Calorie Compass',
+    siteName: 'Calibra'
+  }
 }
