@@ -4,9 +4,12 @@ import { useState, useEffect, useRef } from "react"; // Import useRef
 import { motion, AnimatePresence } from "framer-motion";
 import { numberOrZero, uid } from "@/util/scripts";
 import { useOnClickOutside } from "@/app/hooks/useOnClickOutside";
+import MacroInput from "./MacroInput";
 
 const EMPTY_FORM = {
   name: "",
+  quantity: "",
+  unit: "g",
   calories: "",
   protein: "",
   carbs: "",
@@ -36,6 +39,8 @@ export default function AddFoodForm({
     if (editingEntry) {
       setForm({
         name: editingEntry.name,
+        quantity: String(editingEntry.quantity || ""),
+        unit: String(editingEntry.unit || "g"),
         calories: String(editingEntry.calories || ""),
         protein: String(editingEntry.protein || ""),
         carbs: String(editingEntry.carbs || ""),
@@ -78,6 +83,8 @@ export default function AddFoodForm({
     const payload = {
       id: editingEntry?.id || uid(),
       name: form.name.trim() || "Food",
+      quantity: numberOrZero(form.quantity),
+      unit: form.unit,
       calories: numberOrZero(form.calories),
       protein: numberOrZero(form.protein),
       carbs: numberOrZero(form.carbs),
@@ -173,6 +180,16 @@ export default function AddFoodForm({
 
         {/* Macro Inputs */}
         <MacroInput
+          label="Quantity"
+          value={form.quantity}
+          onChange={(e) => setForm({ ...form, quantity: e.target.value })}
+        />
+        <MacroInput
+          label="unit"
+          value={form.unit}
+          onChange={(e) => setForm({ ...form, unit: e.target.value })}
+        />
+        <MacroInput
           label="Calories"
           value={form.calories}
           onChange={(e) => setForm({ ...form, calories: e.target.value })}
@@ -215,19 +232,3 @@ export default function AddFoodForm({
     </div>
   );
 }
-
-const MacroInput = ({ label, value, onChange }) => (
-  <div>
-    <label className="block text-sm font-medium text-gray-300 mb-1">
-      {label}
-    </label>
-    <input
-      type="number"
-      inputMode="numeric"
-      placeholder="0"
-      value={value}
-      onChange={onChange}
-      className="w-full rounded-lg border border-gray-700 bg-gray-800 p-3 text-white placeholder-gray-500 outline-none focus:border-gray-600 transition-colors"
-    />
-  </div>
-);
