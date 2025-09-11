@@ -1,4 +1,3 @@
-// components/CalorieTracker/EntriesList.jsx
 "use client";
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";

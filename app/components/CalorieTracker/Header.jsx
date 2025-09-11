@@ -1,4 +1,3 @@
-// components/CalorieTracker/Header.jsx
 "use client";
 import { motion } from "framer-motion";
 import { UserButton, useUser } from "@stackframe/stack";
