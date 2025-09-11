@@ -55,6 +55,7 @@ export default function CalorieTrackerPage() {
         <Header date={date} />
 
         <main>
+          {/* TODO: Add a loading screen for date change */}
           <StatsDashboard
             date={date}
             setDate={setDate}
