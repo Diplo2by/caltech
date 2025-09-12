@@ -1,12 +1,15 @@
-// components/CalorieTracker/AddFoodForm.jsx
 "use client";
-import { useState, useEffect, useRef } from "react"; // Import useRef
+import { useState, useEffect, useRef } from "react"; 
 import { motion, AnimatePresence } from "framer-motion";
 import { numberOrZero, uid } from "@/util/scripts";
 import { useOnClickOutside } from "@/app/hooks/useOnClickOutside";
+import MacroInput from "./MacroInput";
+import LoadingThreeDotsPulse from "../motions/LoadingThreeDotsPulse";
 
 const EMPTY_FORM = {
   name: "",
+  quantity: "",
+  unit: "g",
   calories: "",
   protein: "",
   carbs: "",
@@ -23,7 +26,7 @@ export default function AddFoodForm({
 }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [suggestions, setSuggestions] = useState([]);
-  const [loadingMacros, setLoadingMacros] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Create a ref for the suggestions container
   const suggestionsContainerRef = useRef(null);
@@ -36,6 +39,8 @@ export default function AddFoodForm({
     if (editingEntry) {
       setForm({
         name: editingEntry.name,
+        quantity: String(editingEntry.quantity || ""),
+        unit: String(editingEntry.unit || "g"),
         calories: String(editingEntry.calories || ""),
         protein: String(editingEntry.protein || ""),
         carbs: String(editingEntry.carbs || ""),
@@ -55,7 +60,7 @@ export default function AddFoodForm({
   async function fetchMacrosFromGemini() {
     if (!form.name) return;
     try {
-      setLoadingMacros(true);
+      setLoading(true);
       const res = await fetch("/api/macros", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -68,16 +73,19 @@ export default function AddFoodForm({
     } catch (err) {
       console.error("Gemini error", err);
     } finally {
-      setLoadingMacros(false);
+      setLoading(false);
       setSuggestions([]);
     }
   }
 
   async function handleSubmit(e) {
+    setLoading(true);
     e.preventDefault();
     const payload = {
       id: editingEntry?.id || uid(),
       name: form.name.trim() || "Food",
+      quantity: numberOrZero(form.quantity),
+      unit: form.unit,
       calories: numberOrZero(form.calories),
       protein: numberOrZero(form.protein),
       carbs: numberOrZero(form.carbs),
@@ -89,7 +97,10 @@ export default function AddFoodForm({
       ? await updateEntry(payload)
       : await addEntry(payload);
 
-    if (success) resetForm();
+    if (success) {
+      setLoading(false);
+      resetForm();
+    }
   }
 
   function handleNameChange(e) {
@@ -122,20 +133,19 @@ export default function AddFoodForm({
       <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-3">
         {/* Food Name and Auto Button */}
         <div className="col-span-2 flex gap-2">
-          {/* Attach the ref to this container */}
           <div className="flex-1 relative" ref={suggestionsContainerRef}>
             <label className="block text-sm font-medium text-gray-300 mb-1">
               Food name
             </label>
             <input
-              placeholder="Enter food name"
+              placeholder="What did you eat?"
               value={form.name}
               onChange={handleNameChange}
               autoComplete="off"
               className="w-full rounded-lg border border-gray-700 bg-gray-800 p-3 text-white placeholder-gray-500 outline-none focus:border-gray-600 transition-colors"
             />
             <AnimatePresence>
-              {suggestions.length > 0 && !loadingMacros && (
+              {suggestions.length > 0 && !loading && (
                 <motion.ul
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -159,19 +169,44 @@ export default function AddFoodForm({
             <button
               type="button"
               onClick={fetchMacrosFromGemini}
-              disabled={!form.name || loadingMacros}
+              disabled={!form.name || loading}
               className={`rounded-lg px-4 py-3 font-semibold text-white transition-all duration-300 ${
-                loadingMacros
-                  ? "bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 bg-[length:200%_auto] animate-gradient-pan cursor-wait"
+                loading
+                  ? "bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 bg-[length:200%_auto] animate-gradient-pan cursor-wait py-6"
                   : "bg-gray-700 hover:bg-gray-600"
               }`}
             >
-              {loadingMacros ? "..." : "Auto ✨"}
+              {loading ? <LoadingThreeDotsPulse /> : "Auto ✨"}
             </button>
           </div>
         </div>
 
         {/* Macro Inputs */}
+        <MacroInput
+          label="Quantity"
+          value={form.quantity}
+          onChange={(e) => setForm({ ...form, quantity: e.target.value })}
+        />
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-1">
+            Unit
+          </label>
+          <select
+            value={form.unit}
+            onChange={(e) => setForm({ ...form, unit: e.target.value })}
+            className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 text-white outline-none focus:border-gray-600 transition-colors py-3.5 text-sm"
+          >
+            <option value="g">grams (g)</option>
+            <option value="kg">kilograms (kg)</option>
+            <option value="ml">milliliters (ml)</option>
+            <option value="l">liters (l)</option>
+            <option value="cup">cups</option>
+            <option value="tbsp">tablespoons</option>
+            <option value="tsp">teaspoons</option>
+            <option value="piece">pieces</option>
+            <option value="slice">slices</option>
+          </select>
+        </div>
         <MacroInput
           label="Calories"
           value={form.calories}
@@ -196,10 +231,17 @@ export default function AddFoodForm({
         {/* Action Buttons */}
         <div className="col-span-2 flex gap-2 mt-2">
           <button
+            disabled={loading}
             type="submit"
-            className="flex-1 rounded-lg bg-white text-black p-3 font-medium hover:bg-gray-200 transition-colors hover:cursor-pointer active:scale-105"
+            className=" disabled:bg-gray-600 disabled:cursor-default flex-1 rounded-lg bg-white text-black p-3 font-medium  hover:bg-gray-200 transition-colors hover:cursor-pointer active:scale-105"
           >
-            {isEditing ? "Update Entry" : "Add Entry"}
+            {loading ? (
+              <LoadingThreeDotsPulse />
+            ) : isEditing ? (
+              "Update Entry"
+            ) : (
+              "Add Entry"
+            )}
           </button>
           {isEditing && (
             <button
@@ -215,19 +257,3 @@ export default function AddFoodForm({
     </div>
   );
 }
-
-const MacroInput = ({ label, value, onChange }) => (
-  <div>
-    <label className="block text-sm font-medium text-gray-300 mb-1">
-      {label}
-    </label>
-    <input
-      type="number"
-      inputMode="numeric"
-      placeholder="0"
-      value={value}
-      onChange={onChange}
-      className="w-full rounded-lg border border-gray-700 bg-gray-800 p-3 text-white placeholder-gray-500 outline-none focus:border-gray-600 transition-colors"
-    />
-  </div>
-);

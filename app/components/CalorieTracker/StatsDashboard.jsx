@@ -1,4 +1,3 @@
-// components/CalorieTracker/StatsDashboard.jsx
 "use client";
 import { motion } from "framer-motion";
 import { PieChart, Pie, ResponsiveContainer, Cell } from "recharts";

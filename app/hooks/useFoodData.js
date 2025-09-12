@@ -1,4 +1,3 @@
-// hooks/useFoodData.js
 "use client";
 import { useState, useEffect } from "react";
 

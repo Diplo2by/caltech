@@ -1,4 +1,3 @@
-// components/CalorieTracker/LoadingScreen.jsx
 "use client";
 import { motion } from "framer-motion";
 
