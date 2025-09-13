@@ -52,21 +52,26 @@ export default function CalorieTrackerPage() {
     <div className="min-h-screen bg-black text-gray-100">
       <div className="mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
         <Header date={date} />
-        <div className="flex gap-2 mt-4 mb-6">
+        {/* Navigation */}
+        <div className="relative bg-gray-800/80 backdrop-blur-sm rounded-2xl p-1 mt-4 mb-6 inline-flex border border-gray-700">
+          <div
+            className={`absolute top-1 bottom-1 bg-white rounded-xl transition-all duration-300 ease-out shadow-lg ${showTrends ? 'left-1/2 right-1' : 'left-1 right-1/2'
+              }`}
+          />
           <button
             onClick={() => setShowTrends(false)}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${!showTrends
-              ? 'bg-white text-black'
-              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            className={`relative px-8 py-3 rounded-xl font-medium transition-all duration-300 z-10 ${!showTrends
+                ? 'text-black'
+                : 'text-gray-300 hover:text-white'
               }`}
           >
             Daily Tracker
           </button>
           <button
             onClick={() => setShowTrends(true)}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${showTrends
-              ? 'bg-white text-black'
-              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            className={`relative px-8 py-3 rounded-xl font-medium transition-all duration-300 z-10 ${showTrends
+                ? 'text-black'
+                : 'text-gray-300 hover:text-white'
               }`}
           >
             Trends & Analytics
