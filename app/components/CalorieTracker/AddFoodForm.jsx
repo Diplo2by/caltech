@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react"; 
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { numberOrZero, uid } from "@/util/scripts";
 import { useOnClickOutside } from "@/app/hooks/useOnClickOutside";
@@ -57,8 +57,8 @@ export default function AddFoodForm({
     setSuggestions([]);
   }
 
-  async function fetchMacrosFromGemini() {
-    if (!form.name) return;
+  async function fetchMacrosFromGemini(foodName = form.name) {
+    if (!foodName) return;
     try {
       setLoading(true);
       const res = await fetch("/api/macros", {
@@ -122,6 +122,12 @@ export default function AddFoodForm({
       ...form,
       name: food.name,
     });
+    setSuggestions([]);
+    fetchMacrosFromGemini(food.name);
+  }
+
+  function clearForm() {
+    setForm(EMPTY_FORM);
     setSuggestions([]);
   }
 
@@ -229,11 +235,12 @@ export default function AddFoodForm({
         />
 
         {/* Action Buttons */}
+        {/* Action Buttons */}
         <div className="col-span-2 flex gap-2 mt-2">
           <button
             disabled={loading}
             type="submit"
-            className=" disabled:bg-gray-600 disabled:cursor-default flex-1 rounded-lg bg-white text-black p-3 font-medium  hover:bg-gray-200 transition-colors hover:cursor-pointer active:scale-105"
+            className="disabled:bg-gray-600 disabled:cursor-default flex-1 rounded-lg bg-white text-black p-3 font-medium hover:bg-gray-200 transition-colors hover:cursor-pointer active:scale-105"
           >
             {loading ? (
               <LoadingThreeDotsPulse />
@@ -243,6 +250,18 @@ export default function AddFoodForm({
               "Add Entry"
             )}
           </button>
+
+          {!isEditing && form != EMPTY_FORM && (
+            <button
+              type="button"
+              onClick={clearForm}
+              disabled={loading}
+              className="disabled:bg-gray-600 disabled:cursor-default rounded-lg bg-gray-700 px-4 text-white hover:bg-gray-600 transition-colors"
+            >
+              Clear
+            </button>
+          )}
+
           {isEditing && (
             <button
               type="button"

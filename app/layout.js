@@ -19,12 +19,13 @@ export default function RootLayout({ children }) {
 export const metadata = {
   title: 'Calibra',
   description: 'Your Calorie Compass',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   openGraph: {
     title: 'Calibra',
     description: 'Your Calorie Compass',
     siteName: 'Calibra',
     images: [{
-      url: '/assets/og-img.png',
+      url: '/assets/og-img.webp',
       width: 1200,
       height: 630,
     }]
