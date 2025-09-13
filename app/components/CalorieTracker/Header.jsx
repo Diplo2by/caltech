@@ -1,6 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import { UserButton, useUser } from "@stackframe/stack";
+import { todayISO } from "@/util/scripts";
 
 export default function Header({ date }) {
   const { user } = useUser();
@@ -16,7 +17,7 @@ export default function Header({ date }) {
         <p className="text-sm text-gray-400">{user?.primaryEmail}</p>
       </div>
       <div className="mt-2 sm:mt-0 text-sm text-gray-500">
-        {new Date(date).toLocaleDateString("en-IN", { weekday: "long" })}
+        {todayISO().weekDay}
       </div>
       <div className=" text-teal-900">
         <UserButton />

@@ -20,7 +20,7 @@ export default function CalorieTrackerPage() {
   const user = useUser();
   const isSignedIn = !!user;
 
-  const [date, setDate] = useState(todayISO());
+  const [date, setDate] = useState(todayISO().dateString);
   const [editingEntry, setEditingEntry] = useState(null);
   const [showTrends, setShowTrends] = useState(false)
 
@@ -61,8 +61,8 @@ export default function CalorieTrackerPage() {
           <button
             onClick={() => setShowTrends(false)}
             className={`relative px-8 py-3 rounded-xl font-medium transition-all duration-300 z-10 ${!showTrends
-                ? 'text-black'
-                : 'text-gray-300 hover:text-white'
+              ? 'text-black'
+              : 'text-gray-300 hover:text-white'
               }`}
           >
             Daily Tracker
@@ -70,8 +70,8 @@ export default function CalorieTrackerPage() {
           <button
             onClick={() => setShowTrends(true)}
             className={`relative px-8 py-3 rounded-xl font-medium transition-all duration-300 z-10 ${showTrends
-                ? 'text-black'
-                : 'text-gray-300 hover:text-white'
+              ? 'text-black'
+              : 'text-gray-300 hover:text-white'
               }`}
           >
             Trends & Analytics
