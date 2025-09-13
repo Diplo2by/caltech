@@ -1,4 +1,3 @@
-// App Router: app/api/test-db/route.js
 import { neon } from "@neondatabase/serverless";
 
 export async function GET() {
