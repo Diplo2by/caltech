@@ -11,8 +11,7 @@ import {
   Cell,
 } from "recharts";
 import { convertDecimal } from "@/util/scripts";
-import { StatCard } from "../StatCard";
-import "react-calendar-heatmap/dist/styles.css";
+import { StatCard } from "./StatCard";
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444"];
 const TIME_RANGES = [
