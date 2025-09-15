@@ -13,6 +13,8 @@ import {
   Bar,
 } from "recharts";
 import { convertDecimal } from "@/util/scripts";
+import { useEffect } from "react";
+import { StatCard } from "../StatCard";
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444"];
 const TIME_RANGES = [
@@ -46,7 +48,7 @@ export default function TrendsSection({
             name: "Protein",
             value: Math.round(
               macros.reduce(
-                (acc, day) => acc + (day.protein_percentage || 0),
+                (acc, day) => acc + (parseFloat(day.protein_percentage) || 0),
                 0
               ) / macros.length
             ),
@@ -56,7 +58,7 @@ export default function TrendsSection({
             name: "Carbs",
             value: Math.round(
               macros.reduce(
-                (acc, day) => acc + (day.carbs_percentage || 0),
+                (acc, day) => acc + (parseFloat(day.carbs_percentage) || 0),
                 0
               ) / macros.length
             ),
@@ -65,8 +67,10 @@ export default function TrendsSection({
           {
             name: "Fat",
             value: Math.round(
-              macros.reduce((acc, day) => acc + (day.fat_percentage || 0), 0) /
-                macros.length
+              macros.reduce(
+                (acc, day) => acc + (parseFloat(day.fat_percentage) || 0),
+                0
+              ) / macros.length
             ),
             color: "#f59e0b",
           },
@@ -93,6 +97,10 @@ export default function TrendsSection({
       </motion.section>
     );
   }
+
+  useEffect(() => {
+    console.log(topFoodsData);
+  }, [topFoodsData]);
 
   return (
     <motion.section
@@ -244,7 +252,7 @@ export default function TrendsSection({
         </div>
 
         {/* Top Foods */}
-        <div className="bg-gray-800 rounded-lg p-4 border border-gray-700 md:col-span-2">
+        {/* <div className="bg-gray-800 rounded-lg p-4 border border-gray-700 md:col-span-2">
           <h3 className="text-white font-medium mb-4">Most Logged Foods</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -267,16 +275,8 @@ export default function TrendsSection({
               </BarChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </div> */}
       </div>
     </motion.section>
   );
 }
-
-const StatCard = ({ title, value, subtitle }) => (
-  <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-    <div className="text-xs text-gray-400 font-medium mb-1">{title}</div>
-    <div className="text-lg font-bold text-white mb-1">{value}</div>
-    <div className="text-xs text-gray-500">{subtitle}</div>
-  </div>
-);
