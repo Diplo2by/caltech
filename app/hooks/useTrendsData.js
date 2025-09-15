@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 
-export function useTrendsData(isSignedIn) {
+export function useTrendsData(isSignedIn, showTrends) {
   const [trendsData, setTrendsData] = useState({
     daily: [],
     weekly: [],
@@ -15,7 +15,7 @@ export function useTrendsData(isSignedIn) {
 
   const fetchTrendsData = async () => {
     if (!isSignedIn) return;
-    
+
     setIsLoading(true);
     try {
       const [dailyRes, macrosRes, goalsRes, topFoodsRes, streakRes] = await Promise.all([
@@ -49,8 +49,10 @@ export function useTrendsData(isSignedIn) {
   };
 
   useEffect(() => {
-    fetchTrendsData();
-  }, [isSignedIn, timeRange]);
+    if (showTrends) {
+      fetchTrendsData();
+    }
+  }, [isSignedIn, timeRange, showTrends]);
 
   return {
     trendsData,

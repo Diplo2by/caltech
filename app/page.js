@@ -27,7 +27,7 @@ export default function CalorieTrackerPage() {
   const { goal, updateGoal, isLoading: isUserLoading } = useUserData(isSignedIn);
   const { entries, addEntry, updateEntry, deleteEntry } = useEntries(date, isSignedIn);
   const { allFoods } = useFoodData();
-  const { trendsData, isLoading: isTrendsLoading, timeRange, setTimeRange } = useTrendsData(isSignedIn)
+  const { trendsData, isLoading: isTrendsLoading, timeRange, setTimeRange } = useTrendsData(isSignedIn, showTrends)
 
   const totals = useMemo(() => {
     return entries.reduce(
@@ -44,7 +44,6 @@ export default function CalorieTrackerPage() {
 
   const remaining = Math.max(goal - totals.calories, 0);
 
-  useEffect(() => { console.log("date :", date) }, [date])
 
   if (isUserLoading) {
     return <LoadingScreen />;
