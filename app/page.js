@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useUser } from "@stackframe/stack";
 import { todayISO, convertDecimal } from "@/util/scripts"
@@ -20,7 +20,7 @@ export default function CalorieTrackerPage() {
   const user = useUser();
   const isSignedIn = !!user;
 
-  const [date, setDate] = useState(todayISO().dateString);
+  const [date, setDate] = useState(todayISO().sqlDate);
   const [editingEntry, setEditingEntry] = useState(null);
   const [showTrends, setShowTrends] = useState(false)
 
@@ -43,6 +43,8 @@ export default function CalorieTrackerPage() {
   }, [entries]);
 
   const remaining = Math.max(goal - totals.calories, 0);
+
+  useEffect(() => { console.log("date :", date) }, [date])
 
   if (isUserLoading) {
     return <LoadingScreen />;
@@ -81,7 +83,14 @@ export default function CalorieTrackerPage() {
         <main>
           {/* TODO: Add a loading screen for date change */}
 
-          {!showTrends ? (<>
+          {showTrends ? (
+            <TrendsSection
+              trendsData={trendsData}
+              isLoading={isTrendsLoading}
+              timeRange={timeRange}
+              setTimeRange={setTimeRange}
+            />
+          ) : (<>
             <StatsDashboard
               date={date}
               setDate={setDate}
@@ -112,14 +121,7 @@ export default function CalorieTrackerPage() {
                 totals={totals}
                 editingEntry={editingEntry}
               />
-            </motion.section></>) : (
-            <TrendsSection
-              trendsData={trendsData}
-              isLoading={isTrendsLoading}
-              timeRange={timeRange}
-              setTimeRange={setTimeRange}
-            />
-          )}
+            </motion.section></>)}
         </main>
 
         <footer className="py-6 mt-4 text-center text-xs text-gray-600">

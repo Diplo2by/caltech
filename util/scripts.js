@@ -8,7 +8,8 @@ export function todayISO() {
         weekDay: now.toLocaleDateString("en-IN", {
             weekday: "long",
             timeZone: "Asia/Kolkata",
-        })
+        }),
+        sqlDate: now.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" })
     };
 }
 
