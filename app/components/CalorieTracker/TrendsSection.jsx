@@ -9,12 +9,10 @@ import {
   PieChart,
   Pie,
   Cell,
-  BarChart,
-  Bar,
 } from "recharts";
 import { convertDecimal } from "@/util/scripts";
-import { useEffect } from "react";
 import { StatCard } from "../StatCard";
+import "react-calendar-heatmap/dist/styles.css";
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444"];
 const TIME_RANGES = [
@@ -77,13 +75,6 @@ export default function TrendsSection({
         ]
       : [];
 
-  const topFoodsData = topFoods.map((food) => ({
-    name:
-      food.name.length > 15 ? food.name.substring(0, 15) + "..." : food.name,
-    frequency: food.frequency,
-    calories: food.total_calories,
-  }));
-
   if (isLoading) {
     return (
       <motion.section
@@ -97,10 +88,6 @@ export default function TrendsSection({
       </motion.section>
     );
   }
-
-  useEffect(() => {
-    console.log(topFoodsData);
-  }, [topFoodsData]);
 
   return (
     <motion.section
@@ -250,32 +237,6 @@ export default function TrendsSection({
             ))}
           </div>
         </div>
-
-        {/* Top Foods */}
-        {/* <div className="bg-gray-800 rounded-lg p-4 border border-gray-700 md:col-span-2">
-          <h3 className="text-white font-medium mb-4">Most Logged Foods</h3>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={topFoodsData} layout="horizontal">
-                <XAxis
-                  type="number"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "#9CA3AF", fontSize: 12 }}
-                />
-                <YAxis
-                  type="category"
-                  dataKey="name"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "#9CA3AF", fontSize: 12 }}
-                  width={100}
-                />
-                <Bar dataKey="frequency" fill="#10B981" radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div> */}
       </div>
     </motion.section>
   );
