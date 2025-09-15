@@ -11,13 +11,21 @@ export default function StatsDashboard({
   totals,
   remaining,
 }) {
-  const chartData = [
-    { name: "Consumed", value: totals.calories },
-    { name: "Left", value: Math.max(goal - totals.calories, 0) },
-  ];
+  // const chartData = [
+  //   { name: "Consumed", value: totals.calories },
+  //   { name: "Left", value: Math.max(goal - totals.calories, 0) },
+  // ];
 
   const percentage = Math.round((totals.calories / goal) * 100);
+  const isOverGoal = totals.calories > goal;
+  const overPercentage = Math.round(((totals.calories - goal) / goal) * 100);
 
+  const chartData = isOverGoal
+    ? [{ name: "Over Goal", value: overPercentage }]
+    : [
+        { name: "Consumed", value: totals.calories },
+        { name: "Left", value: Math.max(goal - totals.calories, 0) },
+      ];
   return (
     <motion.section
       className="mt-6 grid gap-4 rounded-2xl bg-gray-900/50 border border-gray-800 p-6 sm:grid-cols-2 lg:grid-cols-3"
@@ -67,20 +75,37 @@ export default function StatsDashboard({
             <Pie
               data={chartData}
               dataKey="value"
-              innerRadius="65%"
-              outerRadius="80%"
+              innerRadius="60%"
+              outerRadius="85%"
               startAngle={90}
               endAngle={-270}
               stroke="none"
             >
-              <Cell fill="#4b5563" />
-              <Cell fill="#1f2937" />
+              {isOverGoal ? (
+                <Cell fill="#dc2626" />
+              ) : (
+                <>
+                  <Cell fill="#4b5563" />
+                  <Cell fill="#1f2937" />
+                </>
+              )}
             </Pie>
           </PieChart>
         </ResponsiveContainer>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <p className="text-2xl font-bold text-white">{percentage}%</p>
-          <p className="text-xs text-gray-400">complete</p>
+          {isOverGoal ? (
+            <>
+              <p className="text-2xl font-bold text-red-400">
+                {overPercentage}%
+              </p>
+              <p className="text-xs text-gray-400">over goal</p>
+            </>
+          ) : (
+            <>
+              <p className="text-2xl font-bold text-white">{percentage}%</p>
+              <p className="text-xs text-gray-400">complete</p>
+            </>
+          )}
         </div>
       </div>
     </motion.section>
