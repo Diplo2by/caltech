@@ -1,5 +1,6 @@
 import { StackProvider, StackTheme } from "@stackframe/stack";
 import { stackServerApp } from "../stack";
+import { Analytics } from "@vercel/analytics/next"
 import "./globals.css";
 
 export default function RootLayout({ children }) {
@@ -11,6 +12,7 @@ export default function RootLayout({ children }) {
       <body>
         <StackProvider app={stackServerApp}><StackTheme>
           {children}
+          <Analytics/>
         </StackTheme></StackProvider></body>
     </html>
   );
