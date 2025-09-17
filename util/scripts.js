@@ -1,6 +1,16 @@
 export function todayISO() {
-    const d = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-    return d.toISOString().slice(0, 10);
+    const now = new Date();
+
+    const istDate = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+
+    return {
+        dateString: istDate.toISOString().slice(0, 10),
+        weekDay: now.toLocaleDateString("en-IN", {
+            weekday: "long",
+            timeZone: "Asia/Kolkata",
+        }),
+        sqlDate: now.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" })
+    };
 }
 
 export function uid() {

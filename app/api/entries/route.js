@@ -35,9 +35,6 @@ export async function POST(request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        // Ensure user exists in database
-        await createUser(userId, user.primaryEmail || "");
-
         const body = await request.json();
         const result = await createFoodEntry(userId, body);
 
