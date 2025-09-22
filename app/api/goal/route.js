@@ -1,13 +1,12 @@
 import { getUserGoal, updateUserGoal, createUser } from "@/lib/db";
 import { NextResponse } from "next/server";
-import { stackServerApp } from "@/stack";
+import { getUserId } from "@/util/scripts";
+
 
 // GET - Fetch user's daily calorie goal
-export async function GET() {
+export async function GET(request) {
     try {
-        const user = await stackServerApp.getUser()
-
-        const userId = user.id
+        const userId = getUserId(request)
         if (!userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
@@ -23,9 +22,7 @@ export async function GET() {
 // PUT - Update user's daily calorie goal
 export async function PUT(request) {
     try {
-        const user = await stackServerApp.getUser()
-        const userId = user.id
-
+        const userId = getUserId(request)
 
         if (!userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

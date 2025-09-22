@@ -1,11 +1,10 @@
 import { getWeeklyAverages } from "@/lib/db";
-import { stackServerApp } from "@/stack";
+import { getUserId } from "@/util/scripts";
 import { NextResponse } from "next/server";
 
 export async function GET(request) {
     try {
-        const user = await stackServerApp.getUser();
-        const userId = user.id;
+        const userId = getUserId(request)
 
         if (!userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
