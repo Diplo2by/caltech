@@ -122,9 +122,21 @@ export default function CalorieTrackerPage() {
               />
             </motion.section></>)}
         </main>
-
-        <footer className="py-6 mt-4 text-center text-xs text-gray-600">
-          <div className="w-1 h-1 bg-gray-700 rounded-full mx-auto"></div>
+        <footer className="py-8 mt-8 text-center font-mono">
+          <div className="space-y-2">
+            <div className="text-sm text-gray-400">
+              Made with <span className="text-teal-400 animate-pulse">&lt;3</span> by <span className="text-teal-50">Me</span> & <span className=" text-teal-50">Meg</span>
+            </div>
+            <div className="text-xs text-gray-500">
+              © Copyleft. All Wrongs Reserved. <br />
+              Debugging in production since 2025.
+            </div>
+          </div>
+          <div className="flex justify-center items-center space-x-2 mt-4">
+            <div className="w-1 h-1 bg-gray-700 rounded-full"></div>
+            <div className="w-2 h-2 bg-gray-600 rounded-full"></div>
+            <div className="w-1 h-1 bg-gray-700 rounded-full"></div>
+          </div>
         </footer>
       </div>
     </div>
