@@ -11,21 +11,21 @@ export default function StatsDashboard({
   totals,
   remaining,
 }) {
-  // const chartData = [
-  //   { name: "Consumed", value: totals.calories },
-  //   { name: "Left", value: Math.max(goal - totals.calories, 0) },
-  // ];
-
   const percentage = Math.round((totals.calories / goal) * 100);
   const isOverGoal = totals.calories > goal;
-  const overPercentage = Math.round(((totals.calories - goal) / goal) * 100);
 
   const chartData = isOverGoal
-    ? [{ name: "Over Goal", value: overPercentage }]
+    ? [
+        { name: "Goal", value: goal },
+        { name: "Over", value: totals.calories - goal },
+      ]
     : [
         { name: "Consumed", value: totals.calories },
-        { name: "Left", value: Math.max(goal - totals.calories, 0) },
+        { name: "Remaining", value: Math.max(goal - totals.calories, 0) },
       ];
+
+  const colors = isOverGoal ? ["#4b5563", "#dc2626"] : ["#4b5563", "#1f2937"];
+
   return (
     <motion.section
       className="mt-6 grid gap-4 rounded-2xl bg-gray-900/50 border border-gray-800 p-6 sm:grid-cols-2 lg:grid-cols-3"
@@ -63,7 +63,7 @@ export default function StatsDashboard({
         <StatCard
           label="Left"
           value={convertDecimal(remaining)}
-          valueClassName={remaining === 0 ? "text-red-400" : "text-white"}
+          valueClassName={remaining <= 0 ? "text-red-400" : "text-white"}
         />
         <StatCard label="Goal" value={goal} />
       </div>
@@ -81,14 +81,10 @@ export default function StatsDashboard({
               endAngle={-270}
               stroke="none"
             >
-              {isOverGoal ? (
-                <Cell fill="#dc2626" />
-              ) : (
-                <>
-                  <Cell fill="#4b5563" />
-                  <Cell fill="#1f2937" />
-                </>
-              )}
+              {/* Fix: Map colors to data */}
+              {chartData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={colors[index]} />
+              ))}
             </Pie>
           </PieChart>
         </ResponsiveContainer>
@@ -96,7 +92,7 @@ export default function StatsDashboard({
           {isOverGoal ? (
             <>
               <p className="text-2xl font-bold text-red-400">
-                {overPercentage}%
+                {Math.round(((totals.calories - goal) / goal) * 100)}%
               </p>
               <p className="text-xs text-gray-400">over goal</p>
             </>

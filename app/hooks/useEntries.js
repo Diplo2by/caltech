@@ -3,16 +3,19 @@ import { useState, useEffect } from "react";
 
 export function useEntries(date, isSignedIn) {
     const [entries, setEntries] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         async function loadEntries() {
-            if (!isSignedIn) return;
+            setIsLoading(true);
             try {
                 const res = await fetch(`/api/entries?date=${date}`);
                 const data = await res.json();
                 setEntries(data.entries || []);
             } catch (error) {
                 console.error("Error loading entries:", error);
+            } finally {
+                setIsLoading(false);
             }
         }
         loadEntries();
@@ -63,5 +66,5 @@ export function useEntries(date, isSignedIn) {
         }
     };
 
-    return { entries, addEntry, updateEntry, deleteEntry };
+    return { entries, addEntry, updateEntry, deleteEntry,isLoading };
 }
