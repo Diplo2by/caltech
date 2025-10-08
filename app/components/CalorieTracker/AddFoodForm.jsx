@@ -130,6 +130,25 @@ export default function AddFoodForm({
     setForm(EMPTY_FORM);
     setSuggestions([]);
   }
+  const addDuplicate = async (e) => {
+    setLoading(true);
+    const payload = {
+      id: uid(), // New ID for new entry
+      name: form.name.trim() || "Food",
+      quantity: numberOrZero(form.quantity),
+      unit: form.unit,
+      calories: numberOrZero(form.calories),
+      protein: numberOrZero(form.protein),
+      carbs: numberOrZero(form.carbs),
+      fat: numberOrZero(form.fat),
+      date,
+    };
+    const success = await addEntry(payload);
+    if (success) {
+      setLoading(false);
+      resetForm();
+    }
+  };
 
   return (
     <div className="rounded-2xl bg-gray-900/50 border border-gray-800 p-6">
@@ -235,7 +254,6 @@ export default function AddFoodForm({
         />
 
         {/* Action Buttons */}
-        {/* Action Buttons */}
         <div className="col-span-2 flex gap-2 mt-2">
           <button
             disabled={loading}
@@ -261,15 +279,24 @@ export default function AddFoodForm({
               Clear
             </button>
           )}
-
           {isEditing && (
-            <button
-              type="button"
-              onClick={resetForm}
-              className="rounded-lg bg-gray-700 px-4 text-white hover:bg-gray-600 transition-colors"
-            >
-              Cancel
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={addDuplicate}
+                disabled={loading}
+                className="disabled:bg-gray-600 disabled:cursor-default flex-1 rounded-lg bg-teal-200 text-black p-3 font-medium hover:bg-gray-200 transition-colors hover:cursor-pointer active:scale-105"
+              >
+                Add Again
+              </button>
+              <button
+                type="button"
+                onClick={resetForm}
+                className="rounded-lg bg-gray-700 px-4 text-white hover:bg-gray-600 transition-colors"
+              >
+                Cancel
+              </button>
+            </>
           )}
         </div>
       </form>
