@@ -8,6 +8,12 @@ export async function POST(req) {
             return NextResponse.json({ error: "Food name required" }, { status: 400 });
         }
 
+        const cleanedFood = food
+            .replace(/\([^)]*\)/g, '')
+            .replace(/\[[^\]]*\]/g, '')
+            .replace(/\{[^}]*\}/g, '')
+            .trim();
+
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) {
             return NextResponse.json({ error: "Missing GEMINI_API_KEY" }, { status: 500 });
@@ -23,10 +29,8 @@ export async function POST(req) {
         });
 
         const prompt = `You are a nutrition bot that analyzes food and returns nutritional values.
-Analyze this food: "${food}"
-
+Analyze this food: "${cleanedFood}"
 Choose the most appropriate unit from: g, kg, ml, l, cup, tbsp, tsp, piece, slice
-
 Respond with valid JSON only containing these exact fields:
 {
   "quantity": number,
@@ -36,7 +40,6 @@ Respond with valid JSON only containing these exact fields:
   "carbs": number,
   "fat": number
 }
-
 Guidelines:
 - Use "g" for solid foods typically measured by weight (fruits, vegetables, meat, etc.)
 - Use "ml" or "l" for liquids
@@ -82,7 +85,7 @@ Guidelines:
         }
 
         return NextResponse.json({
-            food,
+            food: cleanedFood,
             quantity: Math.round(parsed.quantity),
             unit: parsed.unit,
             calories: Math.round(parsed.calories),

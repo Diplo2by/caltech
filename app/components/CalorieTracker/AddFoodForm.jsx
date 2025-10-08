@@ -64,7 +64,7 @@ export default function AddFoodForm({
       const res = await fetch("/api/macros", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ food: form.name }),
+        body: JSON.stringify({ food: foodName }),
       });
       const data = await res.json();
       if (data.calories) {
