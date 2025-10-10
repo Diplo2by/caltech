@@ -57,14 +57,16 @@ export default function AddFoodForm({
     setSuggestions([]);
   }
 
-  async function fetchMacrosFromGemini(foodName = form.name) {
+  async function fetchMacrosFromGemini(foodName) {
     if (!foodName) return;
+    const food =
+      typeof foodName === "string" && foodName ? foodName : form.name;
     try {
       setLoading(true);
       const res = await fetch("/api/macros", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ food: foodName }),
+        body: JSON.stringify({ food: food }),
       });
       const data = await res.json();
       if (data.calories) {
