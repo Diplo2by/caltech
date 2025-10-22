@@ -1,15 +1,11 @@
-import { getFoodEntries, createFoodEntry, updateFoodEntry, deleteFoodEntry, createUser } from "@/lib/db";
-import { stackServerApp } from "@/stack";
+import { getFoodEntries, createFoodEntry, updateFoodEntry, deleteFoodEntry } from "@/lib/db";
+import { getUserId } from "@/util/scripts";
 import { NextResponse } from "next/server";
 
 // GET - Fetch entries for a specific date
 export async function GET(request) {
     try {
-        const user = await stackServerApp.getUser()
-        const userId = user.id;
-        if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
+        const userId = getUserId(request);
 
         const { searchParams } = new URL(request.url);
         const date = searchParams.get("date");
@@ -29,12 +25,7 @@ export async function GET(request) {
 // POST - Create new entry
 export async function POST(request) {
     try {
-        const user = await stackServerApp.getUser()
-        const userId = user.id
-        if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
-
+        const userId = getUserId(request);
         const body = await request.json();
         const result = await createFoodEntry(userId, body);
 
@@ -51,12 +42,7 @@ export async function POST(request) {
 // PUT - Update existing entry
 export async function PUT(request) {
     try {
-        const user = await stackServerApp.getUser()
-        const userId = user.id
-        if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
-
+        const userId = getUserId(request);
         const body = await request.json();
         const { entryId, ...entry } = body;
 
@@ -76,12 +62,7 @@ export async function PUT(request) {
 // DELETE - Delete entry
 export async function DELETE(request) {
     try {
-        const user = await stackServerApp.getUser()
-        const userId = user.id
-        if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
-
+        const userId = getUserId(request);
         const { searchParams } = new URL(request.url);
         const entryId = searchParams.get("id");
 
