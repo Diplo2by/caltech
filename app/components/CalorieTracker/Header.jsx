@@ -4,7 +4,7 @@ import { UserButton, useUser } from "@stackframe/stack";
 import { todayISO } from "@/util/scripts";
 
 export default function Header({ date }) {
-  const { user } = useUser();
+  const user = useUser();
 
   return (
     <motion.header
