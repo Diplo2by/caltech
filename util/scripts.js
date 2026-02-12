@@ -32,3 +32,7 @@ export function convertDecimal(num) {
         return "";
     }
 }
+
+export function getUserId(request) {
+    return request.headers.get('x-user-id');
+}
