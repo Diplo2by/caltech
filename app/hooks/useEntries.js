@@ -6,19 +6,35 @@ export function useEntries(date, isSignedIn) {
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
+        if (!isSignedIn) {
+            setEntries([]);
+            setIsLoading(false);
+            return;
+        }
+
+        const controller = new AbortController();
+
         async function loadEntries() {
             setIsLoading(true);
             try {
-                const res = await fetch(`/api/entries?date=${date}`);
+                const res = await fetch(`/api/entries?date=${date}`, {
+                    signal: controller.signal,
+                });
                 const data = await res.json();
                 setEntries(data.entries || []);
             } catch (error) {
-                console.error("Error loading entries:", error);
+                if (error.name !== "AbortError") {
+                    console.error("Error loading entries:", error);
+                }
             } finally {
                 setIsLoading(false);
             }
         }
         loadEntries();
+
+        return () => {
+            controller.abort();
+        };
     }, [date, isSignedIn]);
 
     const addEntry = async (entry) => {
@@ -66,5 +82,5 @@ export function useEntries(date, isSignedIn) {
         }
     };
 
-    return { entries, addEntry, updateEntry, deleteEntry,isLoading };
+    return { entries, addEntry, updateEntry, deleteEntry, isLoading };
 }

@@ -1,8 +1,8 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useUser } from "@stackframe/stack";
-import { todayISO, convertDecimal } from "@/util/scripts"
+import { todayISO } from "@/util/scripts"
 
 import { useUserData } from "@/app/hooks/useUserData";
 import { useEntries } from "@/app/hooks/useEntries";

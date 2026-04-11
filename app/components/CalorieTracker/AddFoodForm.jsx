@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useDeferredValue } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { numberOrZero, uid } from "@/util/scripts";
 import { useOnClickOutside } from "@/app/hooks/useOnClickOutside";
@@ -27,10 +27,23 @@ export default function AddFoodForm({
   const [form, setForm] = useState(EMPTY_FORM);
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const deferredName = useDeferredValue(form.name);
 
   // Create a ref for the suggestions container
   const suggestionsContainerRef = useRef(null);
   const isEditing = !!editingEntry;
+  const searchableFoods = useMemo(
+    () => allFoods.map((food) => ({ ...food, _name: food.name.toLowerCase() })),
+    [allFoods]
+  );
+  const hasFormData = useMemo(
+    () =>
+      Object.entries(form).some(([key, value]) => {
+        if (key === "unit") return value !== "g";
+        return String(value).trim() !== "";
+      }),
+    [form]
+  );
 
   // Use the custom hook to close suggestions on outside click
   useOnClickOutside(suggestionsContainerRef, () => setSuggestions([]));
@@ -106,24 +119,11 @@ export default function AddFoodForm({
   }
 
   function handleNameChange(e) {
-    const value = e.target.value;
-    setForm({ ...form, name: value });
-
-    if (value.length > 1) {
-      const filtered = allFoods.filter((food) =>
-        food.name.toLowerCase().includes(value.toLowerCase())
-      );
-      setSuggestions(filtered.slice(0, 5)); // Limit suggestions
-    } else {
-      setSuggestions([]);
-    }
+    setForm((prev) => ({ ...prev, name: e.target.value }));
   }
 
   function handleSuggestionClick(food) {
-    setForm({
-      ...form,
-      name: food.name,
-    });
+    setForm((prev) => ({ ...prev, name: food.name }));
     setSuggestions([]);
     fetchMacrosFromGemini(food.name);
   }
@@ -151,6 +151,20 @@ export default function AddFoodForm({
       resetForm();
     }
   };
+
+  useEffect(() => {
+    const value = deferredName.trim().toLowerCase();
+    if (value.length <= 1 || loading) {
+      setSuggestions([]);
+      return;
+    }
+
+    const filtered = searchableFoods
+      .filter((food) => food._name.includes(value))
+      .slice(0, 5)
+      .map(({ _name, ...food }) => food);
+    setSuggestions(filtered);
+  }, [deferredName, searchableFoods, loading]);
 
   return (
     <div className="rounded-2xl bg-gray-900/50 border border-gray-800 p-6">
@@ -212,7 +226,9 @@ export default function AddFoodForm({
         <MacroInput
           label="Quantity"
           value={form.quantity}
-          onChange={(e) => setForm({ ...form, quantity: e.target.value })}
+          onChange={(e) =>
+            setForm((prev) => ({ ...prev, quantity: e.target.value }))
+          }
         />
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-1">
@@ -220,7 +236,9 @@ export default function AddFoodForm({
           </label>
           <select
             value={form.unit}
-            onChange={(e) => setForm({ ...form, unit: e.target.value })}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, unit: e.target.value }))
+            }
             className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 text-white outline-none focus:border-gray-600 transition-colors py-3.5 text-sm"
           >
             <option value="g">grams (g)</option>
@@ -237,22 +255,30 @@ export default function AddFoodForm({
         <MacroInput
           label="Calories"
           value={form.calories}
-          onChange={(e) => setForm({ ...form, calories: e.target.value })}
+          onChange={(e) =>
+            setForm((prev) => ({ ...prev, calories: e.target.value }))
+          }
         />
         <MacroInput
           label="Protein (g)"
           value={form.protein}
-          onChange={(e) => setForm({ ...form, protein: e.target.value })}
+          onChange={(e) =>
+            setForm((prev) => ({ ...prev, protein: e.target.value }))
+          }
         />
         <MacroInput
           label="Carbs (g)"
           value={form.carbs}
-          onChange={(e) => setForm({ ...form, carbs: e.target.value })}
+          onChange={(e) =>
+            setForm((prev) => ({ ...prev, carbs: e.target.value }))
+          }
         />
         <MacroInput
           label="Fat (g)"
           value={form.fat}
-          onChange={(e) => setForm({ ...form, fat: e.target.value })}
+          onChange={(e) =>
+            setForm((prev) => ({ ...prev, fat: e.target.value }))
+          }
         />
 
         {/* Action Buttons */}
@@ -271,7 +297,7 @@ export default function AddFoodForm({
             )}
           </button>
 
-          {!isEditing && form != EMPTY_FORM && (
+          {!isEditing && hasFormData && (
             <button
               type="button"
               onClick={clearForm}

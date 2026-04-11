@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 export function useTrendsData(isSignedIn, showTrends) {
   const [trendsData, setTrendsData] = useState({
@@ -13,17 +13,17 @@ export function useTrendsData(isSignedIn, showTrends) {
   const [isLoading, setIsLoading] = useState(false);
   const [timeRange, setTimeRange] = useState(7);
 
-  const fetchTrendsData = async () => {
+  const fetchTrendsData = useCallback(async (signal) => {
     if (!isSignedIn) return;
 
     setIsLoading(true);
     try {
       const [dailyRes, macrosRes, goalsRes, topFoodsRes, streakRes] = await Promise.all([
-        fetch(`/api/trends/daily?days=${timeRange}`),
-        fetch(`/api/trends/macros?days=${timeRange}`),
-        fetch(`/api/trends/goals?days=${timeRange}&type=trends`),
-        fetch(`/api/trends/foods?days=${timeRange}&limit=5`),
-        fetch(`/api/trends/streak`)
+        fetch(`/api/trends/daily?days=${timeRange}`, { signal }),
+        fetch(`/api/trends/macros?days=${timeRange}`, { signal }),
+        fetch(`/api/trends/goals?days=${timeRange}&type=trends`, { signal }),
+        fetch(`/api/trends/foods?days=${timeRange}&limit=5`, { signal }),
+        fetch(`/api/trends/streak`, { signal })
       ]);
 
       const [daily, macros, goals, topFoods, streak] = await Promise.all([
@@ -42,23 +42,30 @@ export function useTrendsData(isSignedIn, showTrends) {
         streak: streak.streak || 0
       });
     } catch (error) {
-      console.error("Error fetching trends data:", error);
+      if (error.name !== "AbortError") {
+        console.error("Error fetching trends data:", error);
+      }
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [isSignedIn, timeRange]);
 
   useEffect(() => {
-    if (showTrends) {
-      fetchTrendsData();
-    }
-  }, [isSignedIn, timeRange, showTrends]);
+    if (!showTrends || !isSignedIn) return;
+
+    const controller = new AbortController();
+    fetchTrendsData(controller.signal);
+
+    return () => {
+      controller.abort();
+    };
+  }, [isSignedIn, timeRange, showTrends, fetchTrendsData]);
 
   return {
     trendsData,
     isLoading,
     timeRange,
     setTimeRange,
-    refreshTrends: fetchTrendsData
+    refreshTrends: () => fetchTrendsData()
   };
 }

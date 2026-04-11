@@ -1,4 +1,5 @@
 "use client";
+import { memo, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
   LineChart,
@@ -20,7 +21,7 @@ const TIME_RANGES = [
   { value: 30, label: "30 Days" },
 ];
 
-export default function TrendsSection({
+function TrendsSection({
   trendsData,
   isLoading,
   timeRange,
@@ -28,51 +29,52 @@ export default function TrendsSection({
 }) {
   const { daily, macros, goals, topFoods, streak } = trendsData;
 
-  // Prepare chart data
-  const calorieChartData = daily.map((day) => ({
-    date: new Date(day.date).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    }),
-    calories: day.total_calories || 0,
-    goal: goals.find((g) => g.date === day.date)?.daily_goal || 2000,
-  }));
+  const goalsByDate = useMemo(() => {
+    return new Map(goals.map((g) => [g.date, g.daily_goal || 2000]));
+  }, [goals]);
 
-  const macroChartData =
-    macros.length > 0
-      ? [
-          {
-            name: "Protein",
-            value: Math.round(
-              macros.reduce(
-                (acc, day) => acc + (parseFloat(day.protein_percentage) || 0),
-                0
-              ) / macros.length
-            ),
-            color: "#3b82f6",
-          },
-          {
-            name: "Carbs",
-            value: Math.round(
-              macros.reduce(
-                (acc, day) => acc + (parseFloat(day.carbs_percentage) || 0),
-                0
-              ) / macros.length
-            ),
-            color: "#10b981",
-          },
-          {
-            name: "Fat",
-            value: Math.round(
-              macros.reduce(
-                (acc, day) => acc + (parseFloat(day.fat_percentage) || 0),
-                0
-              ) / macros.length
-            ),
-            color: "#f59e0b",
-          },
-        ]
-      : [];
+  const calorieChartData = useMemo(() => {
+    return daily.map((day) => ({
+      date: new Date(day.date).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      }),
+      calories: day.total_calories || 0,
+      goal: goalsByDate.get(day.date) || 2000,
+    }));
+  }, [daily, goalsByDate]);
+
+  const macroChartData = useMemo(() => {
+    if (macros.length === 0) return [];
+
+    const totals = macros.reduce(
+      (acc, day) => {
+        acc.protein += parseFloat(day.protein_percentage) || 0;
+        acc.carbs += parseFloat(day.carbs_percentage) || 0;
+        acc.fat += parseFloat(day.fat_percentage) || 0;
+        return acc;
+      },
+      { protein: 0, carbs: 0, fat: 0 }
+    );
+
+    return [
+      {
+        name: "Protein",
+        value: Math.round(totals.protein / macros.length),
+        color: "#3b82f6",
+      },
+      {
+        name: "Carbs",
+        value: Math.round(totals.carbs / macros.length),
+        color: "#10b981",
+      },
+      {
+        name: "Fat",
+        value: Math.round(totals.fat / macros.length),
+        color: "#f59e0b",
+      },
+    ];
+  }, [macros]);
 
   if (isLoading) {
     return (
@@ -240,3 +242,5 @@ export default function TrendsSection({
     </motion.section>
   );
 }
+
+export default memo(TrendsSection);

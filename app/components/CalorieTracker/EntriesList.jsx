@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useDeferredValue } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { convertDecimal } from "@/util/scripts";
 
@@ -11,12 +11,15 @@ export default function EntriesList({
   editingEntry,
 }) {
   const [search, setSearch] = useState("");
+  const deferredSearch = useDeferredValue(search);
+  const normalizedSearch = deferredSearch.trim().toLowerCase();
 
   const filteredEntries = useMemo(() => {
+    if (!normalizedSearch) return entries;
     return entries.filter((e) =>
-      e.name.toLowerCase().includes(search.toLowerCase())
+      e.name.toLowerCase().includes(normalizedSearch)
     );
-  }, [entries, search]);
+  }, [entries, normalizedSearch]);
 
   return (
     <div className="rounded-2xl bg-gray-900/50 border border-gray-800 p-6">
